@@ -248,6 +248,19 @@ func serveIndexTemplate(w http.ResponseWriter, r *http.Request) {
 		PartageKey: partageKey,
 		SvgLogo:    os.Getenv("SVG_LOGO"),
 	}
+	w.Header().Set("Content-Security-Policy",
+		"default-src 'self'; "+
+			"script-src 'self'; "+
+			"style-src 'self'; "+
+			"img-src 'self'; "+
+			"connect-src 'self'; "+
+			"frame-ancestors 'none';"+
+			"upgrade-insecure-requests;",
+	)
+	w.Header().Set("Referrer-Policy", "same-origin")
+	w.Header().Set("Strict-Transport-Security", "max-age=63072000")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("X-Frame-Options", "DENY")
 
 	// Execute the template with the data.
 	if err := tmpl.Execute(w, data); err != nil {
