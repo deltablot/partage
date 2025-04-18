@@ -1,0 +1,15 @@
+# deploy partage service
+# use: "docker compose up -d" to start service
+services:
+    partage:
+        image: ghcr.io/deltablot/partage:latest
+        container_name: partage
+        security_opt:
+            - no-new-privileges:true
+        restart: always
+        environment:
+            - SITE_URL=https://partage.example.com
+        ports:
+            - "8080:8080"
+        #expose:
+        #    - 8080
