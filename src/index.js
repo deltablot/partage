@@ -3,6 +3,19 @@ import { Partage } from './partage.js';
 //import './main.css';
 
 document.addEventListener('DOMContentLoaded', function() {
+
+  document.querySelectorAll('.toggle-eye').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = btn.previousElementSibling;
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.setAttribute('aria-label', 'Hide passphrase');
+      } else {
+        input.type = 'password';
+        btn.setAttribute('aria-label', 'Show passphrase');
+      }
+    });
+  });
   const partage = new Partage();
 
   const dialog = document.querySelector("dialog");

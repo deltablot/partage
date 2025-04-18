@@ -130,9 +130,6 @@ input {
 .passphrase {
     width: 70%;
     min-width: 50%;
-    input {
-        margin-top: 20px;
-    }
 }
 input[name="passphrase"] {
     width: 100%;
@@ -143,6 +140,24 @@ input[name="passphrase"] {
 input:focus {
     outline: none;
     box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+}
+
+.password-wrapper {
+  position: relative;
+  display: inline-block;
+}
+.password-wrapper input {
+  padding-right: 2em;
+}
+.password-wrapper .toggle-eye {
+  position: absolute;
+  right: 0.5em;
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 1em;
+  line-height: 1;
+  cursor: pointer;
 }
 
 

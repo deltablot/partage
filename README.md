@@ -16,15 +16,13 @@ Share files securely.
 
 The application is configured through environment variables:
 
-+--------------------+------------------+-------------------------------+----------------------------------------------------------+
-|       Name         |     Default      |           Example             |                       Description                        |
-+--------------------+------------------+-------------------------------+----------------------------------------------------------+
-| `SITE_URL`          | http://localhost | https://partage.deltablot.com | the full URL of the site, as it appears to visitors      |
-| `MAX_FILE_SIZE_MB`  | 1024             | 2048                          | maximum size of uploaded files in Mb                     |
-| `MAX_TOTAL_FILES`   | 24               | 5000                          | maximum number of files that can be stored on the server |
-| `CLEANUP_TIMER_MIN` | 10               | 60                            | interval of time in minutes between pruning of old files |
-| `SVG_LOGO`          | ""               | `<some svg data>`             | svg content for the logo                                 |
-+--------------------+------------------+-------------------------------+----------------------------------------------------------+
+| Name                | Description                                         | Default | Example           |
+|---------------------|-----------------------------------------------------|---------|-------------------|
+| `SITE_URL`          | the full URL of the site, as it appears to visitors | 1024    | 2048              |
+| `MAX_FILE_SIZE_MB`  | maximum size of uploaded files in Mb                | 24      | 5000              |
+| `CLEANUP_TIMER_MIN` | interval of time in minutes between pruning of old  | 10      | 60                |
+| `SVG_LOGO`          | svg content for the logo                            | ""      | `<some svg data>` |
+
 
 By default, the program listens on port `8080`.
 

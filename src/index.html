@@ -23,10 +23,9 @@
       <h1>Download your file</h1>
       <p id='expiresAt'></p>
       <form id='getForm' class='d-flex'>
-        <div class='passphrase'>
-          <label>Passphrase
-            <input required name='passphrase' id='passphrase' placeholder='Enter the secret passphrase provided with this URL' />
-          </label>
+        <div class='passphrase password-wrapper'>
+          <input type='password' autocomplete='off' required name='passphrase' id='passphrase' placeholder='Enter the secret passphrase provided with this URL' />
+          <button type='button' class='toggle-eye' aria-label='Show passphrase'>🫣</button>
         </div>
         <button type='submit'>⬇️ Download</button>
       </form>
@@ -40,7 +39,10 @@
         </div>
         <div>
           <label for='passphrase'>⚿ 2. Enter a passphrase</label>
-          <input required name='passphrase' placeholder='Enter your passphrase' id='passphrase' />
+          <div class='password-wrapper'>
+            <input id='passphrase' autocomplete='off' required name='passphrase' type='password' placeholder='Enter your passphrase'>
+            <button type='button' class='toggle-eye' aria-label='Show passphrase'>🫣</button>
+          </div>
         </div>
         <div>
         <label for='deadline'>⌛ 3. Select expiration</label>
