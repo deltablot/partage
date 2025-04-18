@@ -23,7 +23,7 @@ If you're interested in having a file sharing service that is fast, easy to depl
 
 ### PrivateBin
 
-[https://github.com/PrivateBin/PrivateBin](PrivateBin) is a fork of ZeroBin, which was initiated a long time ago, as a good old PHP project. The PrivateBin project refactored a few things to make it maintainable, but it's a tool that shows its age:
+[PrivateBin](https://github.com/PrivateBin/PrivateBin) is a fork of ZeroBin, which was initiated a long time ago, as a good old PHP project. The PrivateBin project refactored a few things to make it maintainable, but it's a tool that shows its age:
 
 - 15,000+ lines of JS code with hardcoded libraries in the repository like it's 2003
 - 6,000+ lines of spaghetti PHP code
@@ -33,7 +33,7 @@ If you're interested in having a file sharing service that is fast, easy to depl
 
 ### Password Pusher
 
-[https://github.com/pglombardo/PasswordPusher](PasswordPusher) is a very complete project, written in ruby. It has many features, which means many lines of code to audit. It's a great tool, and actively maintained, but overly complicated if what you want is simply sharing a file securely with someone else.
+[PasswordPusher](https://github.com/pglombardo/PasswordPusher) is a very complete project, written in ruby. It has many features, which means many lines of code to audit. It's a great tool, and actively maintained, but overly complicated if what you want is simply sharing a file securely with someone else.
 
 ## Deploy Partage
 
