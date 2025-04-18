@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Partage: share files securely.">
+  <title>Partage</title>
+  <link rel='stylesheet' media='all' href='/main.css' />
+</head>
+<body>
+  <dialog>
+    <h3>Error</h3>
+    <p id='error'></p>
+    <div class='text-center'>
+      <button autofocus>Close</button>
+    </div>
+  </dialog>
+  <div class='container'>
+    <nav><a href='/'>Partage</a></nav>
+    <div class='logo'>{{ .SvgLogo }}</div>
+    <div class='content'>
+      {{ if .GetPage }}
+      <h1>Download your file</h1>
+      <p id='expiresAt'></p>
+      <form id='getForm' class='d-flex'>
+        <div class='passphrase'>
+          <label>Passphrase
+            <input required name='passphrase' id='passphrase' placeholder='Enter the secret passphrase provided with this URL' />
+          </label>
+        </div>
+        <button type='submit'>⬇️ Download</button>
+      </form>
+      {{ else }}
+      <h1>Share a file</h1>
+
+      <form id='uploadForm' class='d-flex' action='/api/v1/parts' method='POST' enctype='multipart/form-data'>
+        <div>
+          <label for='file'>🖺 1. Upload a file</label>
+          <input type='file' required name='file' id='file' />
+        </div>
+        <div>
+          <label for='passphrase'>⚿ 2. Enter a passphrase</label>
+          <input required name='passphrase' placeholder='Enter your passphrase' id='passphrase' />
+        </div>
+        <div>
+        <label for='deadline'>⌛ 3. Select expiration</label>
+        <select required name='deadline' id='deadline'>
+          <option value='1h'>1 hour</option>
+          <option value='24h'>1 day</option>
+          <option value='72h'>3 days</option>
+          <option value='168h'>1 week</option>
+          <option value='504h'>3 weeks</option>
+        </select>
+        </div>
+        <hr>
+        <button type='submit'>⬆️ Send</button>
+      </form>
+      <div hidden id='linkDiv'></div>
+      {{ end }}
+    </div>
+    <footer>Made with ♥ by <a href='https://www.deltablot.com' target='_blank' rel='noreferrer'>Deltablot</a></footer>
+  </div>
+  <span hidden id='x-partage-key'>{{ .PartageKey }}</span>
+  <script type='module' src='/index.js'></script>
+</body>
+</html>

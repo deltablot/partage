@@ -1,0 +1,5 @@
+files/
+partage
+.yarn/*
+.pnp.*
+src/dist/
