@@ -30,4 +30,4 @@ jobs:
           push: true
           build-args: |
               VERSION=${{ github.ref_name }}
-          tags: ghcr.io/deltablot/partage:latest,ghcr.io/deltablot/partage:{{ github.ref_name }}
+          tags: ghcr.io/deltablot/partage:latest,ghcr.io/deltablot/partage:${{ github.ref_name }}
