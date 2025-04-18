@@ -43,6 +43,12 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', async function(event) {
       event.preventDefault();
 
+      const submitterType = event.submitter.getAttribute('type');
+      if (submitterType === 'cancel') {
+        form.reset();
+        return;
+      }
+
       // get file
       const fileInput = form.querySelector('input[type="file"]');
       const file = fileInput.files[0];
@@ -57,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const formData = new FormData();
       // send the key in a custom header
       const partageKey = document.getElementById('x-partage-key').innerText;
-      const deadline = document.getElementById('deadline').value;
+      const deadline = document.querySelector('select[name="deadline"]').value;
       const headers = new Headers({'X-Partage-Key': partageKey});
       formData.append("file", encryptedBlob, "partage");
       formData.append("deadline", deadline);
@@ -70,18 +76,27 @@ document.addEventListener('DOMContentLoaded', function() {
         if (response.ok) {
           const json = await response.json();
           const linkDiv = document.getElementById('linkDiv');
+          document.getElementById('anotherDiv').removeAttribute('hidden');
           linkDiv.removeAttribute('hidden');
           const link = document.createElement('input');
           const linkUrl = `${document.location}get#${json.id}-${json.expires_at}`;
           link.value = linkUrl;
           link.setAttribute('readonly', 'readonly');
-          link.addEventListener('focus', () => link.select());
-          link.addEventListener('click', () => link.select());
+          link.addEventListener('focus', async () => {
+            link.select();
+            await navigator.clipboard.writeText(link.value);
+          });
+          link.addEventListener('click', async () => {
+            link.select();
+            await navigator.clipboard.writeText(link.value);
+          });
+
           link.innerText = linkUrl;
           link.classList.add('get-link');
           linkDiv.innerText = '';
           linkDiv.appendChild(link);
           form.remove();
+          document.getElementById('subtitle').innerText = 'Copy this link and send it with the passphrase';
         } else {
           alert(await response.text());
         }

@@ -3,3 +3,4 @@ partage
 .yarn/*
 .pnp.*
 src/dist/
+*.svg

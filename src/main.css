@@ -3,8 +3,11 @@
 }
 
 :root {
-    --black: #050411;
-    --white: #f1e3f3;
+    --black: #351f47;
+    --black-highlight: #4a2c63;
+    --medium: #634c76;
+    --white: #f8eff8;
+    --highlight: #f1e4f1;
     --blue: #8FB8ED;
     --red: #93439D;
 }
@@ -22,15 +25,17 @@ body {
 
 .container {
   box-sizing: border-box;
-  min-height: 100%;
-
   display: flex;
   flex-direction: column;
+  min-height: 100%;
 }
 .content {
   padding: 3vw;
   flex-grow: 1;
   text-align: center;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
 }
 
 a {
@@ -52,7 +57,9 @@ nav {
     flex-grow: 0;
     flex-shrink: 0;
     text-align: center;
-    font-size: 2rem;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 2rem;
     a {
         color: var(--white);
     }
@@ -62,11 +69,20 @@ nav {
     }
 }
 
-.logo {
-    height: 60px;
+.centered {
     text-align: center;
-    margin-bottom: 25px;
 }
+
+h1 {
+    margin-bottom: 0;
+}
+
+h2 {
+    color: var(--medium);
+    margin-top: 3px;
+    font-size: 1rem;
+}
+
 
 dialog {
     border-radius: 5px;
@@ -78,38 +94,36 @@ dialog::backdrop {
     backdrop-filter: blur(5px);
 }
 
-
 form {
-    width: 100%;
-    margin: auto;
-    align-items: center;
-    justify-content: center;
-
-    div {
-        width: 50%;
-
-        label {
-            display: block;
-            margin: 7px 0;
-        }
-    }
-
+    display: flex;
+    flex-direction: column;
+    margin: 1rem auto;
+    padding: 1rem;
+    width: clamp(300px, 42%, 800px);
     select {
-        padding: 5px;
+        padding: 10px;
+        background-color: white;
+        border-radius: 5px;
     }
-
-
+    select, input {
+        border: 1px solid var(--black);
+    }
 }
 
 button {
+    background-color: var(--black);
     margin-top: 10px;
-    padding: 10px;
+    padding: 6px 23px;
     cursor: pointer;
     font-weight: bold;
-    color: var(--black);
+    color: var(--white);
     font-size: 1.2rem;
     border-radius: 5px;
-    border: 1px solid var(--blue);
+    border: 1px solid var(--black);
+
+    &:hover {
+        background-color: var(--black-highlight);
+    }
 }
 
 hr {
@@ -124,6 +138,28 @@ input {
     border-radius: 0.25rem;
     margin-bottom: 3%;
     height: 2.3rem;
+}
+
+input[type="file"] {
+    background-color: #fff;
+    margin-top: 25px;
+    padding: 25px 10px;
+    width: 100%;
+    border: 2px dashed var(--black);
+    border-radius: 5px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #f1f1f1;
+    }
+
+    &::file-selector-button {
+        display: none;
+        background-color: #fff;
+        margin: auto;
+        padding: 8px 16px;
+        border: none;
+    }
 }
 
 
@@ -142,14 +178,22 @@ input:focus {
     box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
 }
 
+select[name="deadline"] {
+    width: 100%;
+    margin-top: 25px;
+}
+
 .password-wrapper {
   position: relative;
+  margin-top: 25px;
+  width: 100%;
   display: inline-block;
 }
 .password-wrapper input {
   padding-right: 2em;
 }
 .password-wrapper .toggle-eye {
+    color: var(--black);
   position: absolute;
   right: 0.5em;
   background: none;
@@ -169,16 +213,62 @@ input:focus {
 .d-flex {
     display: flex;
     flex-direction: column;
+
+    &.flex-row {
+        flex-direction: row;
+    }
 }
+
+.section-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-top: 50px;
+}
+
+.btn-ghost {
+    background-color: var(--white);
+    color: var(--black);
+    border: 1px solid var(--black);
+    border-radius: 5px;
+    padding: 8px;
+    text-decoration: none;
+
+    &:hover {
+        background-color: var(--highlight);
+        text-decoration: none;
+    }
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--black);
+    margin-top: 8px;
+
+    h3 {
+        margin: 3px 0;
+        display: inline;
+        font-size: 1.2rem;
+    }
+    span {
+        align-items: baseline;
+        font-size: 0.9rem;
+    }
+}
+
 
 input.get-link {
     width: 70ch;
     text-align: center;
-    margin: auto;
+    margin: 0 auto 42px auto;
     color: var(--black);
 }
 
 #tos {
+    font-size: 0.8rem;
     min-width: 50%;
 }
 

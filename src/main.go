@@ -52,7 +52,9 @@ var partageVersion string = "dev"
 
 var storageDirectory string
 
-var defaultMaxFileSizeMb = "1024"
+var maxFileSizeStr = "1024"
+
+var maxFileSize int64
 
 var defaultMaxTotalFiles int64 = 24
 
@@ -74,6 +76,18 @@ func getUuidv7() (string, error) {
 		return "", fmt.Errorf("failed to generate UUID: %w", err)
 	}
 	return id.String(), nil
+}
+
+func initMaxFileSize() int64 {
+	maxFileSizeStr = "1024"
+	if os.Getenv("MAX_FILE_SIZE_MB") != "" {
+		maxFileSizeStr = os.Getenv("MAX_FILE_SIZE_MB")
+	}
+	maxFileSize, err := strconv.ParseInt(maxFileSizeStr, 10, 64)
+	if err != nil {
+		errorLogger.Fatalf("Server misconfiguration: invalid MAX_FILE_SIZE_MB %v", err)
+	}
+	return maxFileSize
 }
 
 func initPartageKey() {
@@ -125,16 +139,6 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer file.Close()
 
-	// enforce max file size from env (in MB)
-	maxFileSizeStr := os.Getenv("MAX_FILE_SIZE_MB")
-	if maxFileSizeStr == "" {
-		maxFileSizeStr = defaultMaxFileSizeMb
-	}
-	maxFileSize, err := strconv.ParseInt(maxFileSizeStr, 10, 64)
-	if err != nil {
-		http.Error(w, "Server misconfiguration: invalid MAX_FILE_SIZE_MB", http.StatusInternalServerError)
-		return
-	}
 	maxBytes := maxFileSize * 1024 * 1024
 	if header.Size > maxBytes {
 		http.Error(w, fmt.Sprintf("File too large. Maximum allowed is %d MB", maxFileSize), http.StatusRequestEntityTooLarge)
@@ -240,13 +244,15 @@ func serveIndexTemplate(w http.ResponseWriter, r *http.Request) {
 
 	// Build the data object for the template.
 	data := struct {
-		GetPage    bool
-		PartageKey string
-		SvgLogo    string
+		GetPage     bool
+		PartageKey  string
+		SvgLogo     string
+		MaxFileSize int64
 	}{
-		GetPage:    getPage,
-		PartageKey: partageKey,
-		SvgLogo:    os.Getenv("SVG_LOGO"),
+		GetPage:     getPage,
+		PartageKey:  partageKey,
+		SvgLogo:     os.Getenv("SVG_LOGO"),
+		MaxFileSize: maxFileSize,
 	}
 	w.Header().Set("Content-Security-Policy",
 		"default-src 'self'; "+
@@ -264,6 +270,7 @@ func serveIndexTemplate(w http.ResponseWriter, r *http.Request) {
 
 	// Execute the template with the data.
 	if err := tmpl.Execute(w, data); err != nil {
+		errorLogger.Printf("Template error: %v", err)
 		http.Error(w, "Error executing template", http.StatusInternalServerError)
 	}
 }
@@ -377,6 +384,8 @@ func main() {
 	port := flag.String("port", "8080", "Port to listen on")
 	dir := flag.String("dir", "/var/partage", "Directory to store uploaded files")
 	flag.Parse()
+
+	maxFileSize = initMaxFileSize()
 
 	initPartageKey()
 
