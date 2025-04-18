@@ -30,7 +30,7 @@ import (
 
 //go:generate bash build.sh
 
-//go:embed dist/index.js* dist/main.css* index.html dist/favicon.ico
+//go:embed dist/index.js* dist/main.css* index.html dist/favicon.ico dist/robots.txt
 var staticFiles embed.FS
 
 var (
