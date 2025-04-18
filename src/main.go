@@ -251,7 +251,7 @@ func serveIndexTemplate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Security-Policy",
 		"default-src 'self'; "+
 			"script-src 'self'; "+
-			"style-src 'self'; "+
+			"style-src 'self' unsafe-inline; "+
 			"img-src 'self'; "+
 			"connect-src 'self'; "+
 			"frame-ancestors 'none';"+
