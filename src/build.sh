@@ -9,8 +9,7 @@ DIST_DIR=dist
 rm -rf $DIST_DIR
 mkdir -p $DIST_DIR
 
-# 1. Minify JS+CSS (using esbuild, terser, clean-css, or any tool)
-#    here’s an esbuild example:
+# create dist/index.js
 yarn run esbuild \
   --minify \
   --bundle \
@@ -24,7 +23,7 @@ yarn run esbuild \
 cp "$SRC_DIR"/robots.txt "$DIST_DIR"
 cp "$SRC_DIR"/favicon.ico "$DIST_DIR"
 
-# 2. Brotli‑compress everything in $DIST_DIR
+# brotli‑compress everything in $DIST_DIR
 for file in $DIST_DIR/*.{js,css,txt,ico}; do
   brotli --quality=11 --keep --output="$file.br" "$file"
 done

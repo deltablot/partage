@@ -66,3 +66,37 @@ You can use the `VERSION` build argument to customize the version string.
 ~~~
 docker build --build-arg VERSION=custom -t ghcr.io/deltablot/partage .
 ~~~
+
+# Technical details
+
+TL;DR: encryption happens locally, the server doesn't know anything about the files you share.
+
+## High level view
+
+### Client-side encryption
+
+Before being sent to the server, the file is locally encrypted with a key derived from the provided passphrase. It is then sent to the server, with some encrypted metadata such as the original file name. This encryption is done using the [SubtleCrypto API](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto). This means no external library is used, we only rely on browser implementation. **Partage** is only available in secure contexts, which is localhost and https.
+
+### Client-side decryption
+
+To download a file, the correct passphrase must be provided, along with the filename which is present in the hash part of the URL − not sent to the server. The encrypted file is requested from the server, and decrypted locally with the provided passphrase.
+
+## Low level details
+
+The encrypted blob is built by concatenating three things:
+
+header + metadata + file
+
+The `header` stores the length of the metadata using two bytes.
+
+The `metadata` is a JSON object composed of:
+
+- `content_type`: the content-type of the file so we can create a Blob with the same value for download
+- `created_at`: the file creation date
+- `filename`: original file name
+
+The original file is then added after header and metadata. This blob is then encrypted using a 16 bytes salt and 12 bytes IV. We then concatenate the salt + iv + encrypted blob and send this to the server through a POST request.
+
+This way, the server has no knowledge about the original filename or other metadata.
+
+To decrypt, we ask the server for the file, we know the size of salt and iv so we can use them, along with the derived key from passphrase to decrypt the file and make the browser download it.

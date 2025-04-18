@@ -28,34 +28,34 @@ export class Partage {
     // import passphrase as key for derivation
     const baseKey = await this.getBaseKey(passphrase);
     const derivedKey = await this.getDerivedKey(baseKey, ['encrypt']);
-      // METADATA
-      const metadata = this.getMetadata(file);
-      const metadataEncoded = this.encoder.encode(JSON.stringify(metadata));
-      // header will store the metadata length
-      const header = new Uint8Array(this.headerLength);
-      new DataView(header.buffer).setUint16(0, metadataEncoded.byteLength, false);
+    // METADATA
+    const metadata = this.getMetadata(file);
+    const metadataEncoded = this.encoder.encode(JSON.stringify(metadata));
+    // header will store the metadata length
+    const header = new Uint8Array(this.headerLength);
+    new DataView(header.buffer).setUint16(0, metadataEncoded.byteLength, false);
 
-      // Encrypted data = header + metadata + file
-      const combinedLength = header.byteLength + metadataEncoded.byteLength + arrayBuffer.byteLength;
-      const taggedFile = new Uint8Array(combinedLength);
-      taggedFile.set(header, 0);
-      taggedFile.set(metadataEncoded, header.byteLength);
-      taggedFile.set(new Uint8Array(arrayBuffer), header.byteLength + metadataEncoded.byteLength);
+    // Encrypted data = header + metadata + file
+    const combinedLength = header.byteLength + metadataEncoded.byteLength + arrayBuffer.byteLength;
+    const taggedFile = new Uint8Array(combinedLength);
+    taggedFile.set(header, 0);
+    taggedFile.set(metadataEncoded, header.byteLength);
+    taggedFile.set(new Uint8Array(arrayBuffer), header.byteLength + metadataEncoded.byteLength);
 
-      const encryptedBuffer = await this.encrypt(derivedKey, taggedFile);
+    const encryptedBuffer = await this.encrypt(derivedKey, taggedFile);
 
-      const ciphertextArray = new Uint8Array(encryptedBuffer);
-      // Allocate a new buffer: 16 bytes for salt, 12 bytes for IV, plus the ciphertext length.
-      const combinedBuffer = new Uint8Array(this.saltLength + this.iv.byteLength + ciphertextArray.byteLength);
-      // Copy the salt at the beginning.
-      combinedBuffer.set(this.salt, 0);
-      // Append the IV after the salt.
-      combinedBuffer.set(this.iv, this.salt.byteLength);
-      // Append the ciphertext after the salt, IV and filename.
-      combinedBuffer.set(ciphertextArray, this.salt.byteLength + this.iv.byteLength);
+    const ciphertextArray = new Uint8Array(encryptedBuffer);
+    // Allocate a new buffer: 16 bytes for salt, 12 bytes for IV, plus the ciphertext length.
+    const combinedBuffer = new Uint8Array(this.saltLength + this.iv.byteLength + ciphertextArray.byteLength);
+    // Copy the salt at the beginning.
+    combinedBuffer.set(this.salt, 0);
+    // Append the IV after the salt.
+    combinedBuffer.set(this.iv, this.salt.byteLength);
+    // Append the ciphertext after the salt and IV
+    combinedBuffer.set(ciphertextArray, this.salt.byteLength + this.iv.byteLength);
 
-      // Create a Blob from the combined buffer and append it to the FormData.
-      return new Blob([combinedBuffer], { type: "application/octet-stream" });
+    // Create a Blob from the combined buffer and append it to the FormData.
+    return new Blob([combinedBuffer], { type: "application/octet-stream" });
   }
 
   async getBaseKey(passphrase) {

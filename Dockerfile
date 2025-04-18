@@ -4,7 +4,7 @@
 # https://github.com/deltablot/partage
 
 # STEP 1
-# Node image to minifiy js and css files + brotli compression
+# Node image to minify js and css files + brotli compression
 FROM node:23-alpine AS bundler
 RUN corepack enable \
     && corepack prepare yarn@stable --activate
