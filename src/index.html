@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- partage - © 2025 Nicolas CARPi, Deltablot -->
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Partage: share files securely.">
   <title>Partage</title>
-  <link rel='stylesheet' media='all' href='/main.css' />
+  <link rel='stylesheet' media='all' href='/main.css?v={{ .PartageKey }}' />
 </head>
 <body>
   <dialog id='error-dialog'>
@@ -104,6 +105,6 @@
     <footer><a href='#' id='tos-link'>Terms of use</a> | <a href='https://www.deltablot.com/privacy/' target='_blank' rel='noreferrer'>Privacy policy</a> | <a href='https://github.com/deltablot/partage?tab=readme-ov-file#partage' target='_blank' rel='noreferrer'>Source code</a> | Made with ♥ by <a href='https://www.deltablot.com' target='_blank' rel='noreferrer'>Deltablot</a></footer>
   </div>
   <span hidden id='x-partage-key'>{{ .PartageKey }}</span>
-  <script type='module' src='/index.js'></script>
+  <script type='module' src='/index.js?v={{ .PartageKey }}'></script>
 </body>
 </html>

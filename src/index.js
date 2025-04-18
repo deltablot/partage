@@ -1,6 +1,8 @@
+/**
+ * partage - © 2025 Nicolas CARPi, Deltablot
+ */
 import { formatUnixTimestamp } from './utils.js';
 import { Partage } from './partage.js';
-//import './main.css';
 
 document.addEventListener('DOMContentLoaded', function() {
 
