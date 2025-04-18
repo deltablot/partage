@@ -18,12 +18,20 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   const partage = new Partage();
 
-  const dialog = document.querySelector("dialog");
-  const closeButton = document.querySelector("dialog button");
-
-  // "Close" button closes the dialog
+  const errorDialog = document.getElementById('error-dialog');
+  const closeButton = errorDialog.querySelector("button");
   closeButton.addEventListener("click", () => {
-    dialog.close();
+    errorDialog.close();
+  });
+
+  const tosLink = document.getElementById('tos-link');
+  const tosDialog = document.getElementById('tos');
+  tosLink.addEventListener("click", () => {
+    tosDialog.showModal();
+  });
+  const closeButtonTos = tosDialog.querySelector("button");
+  closeButtonTos.addEventListener("click", () => {
+    tosDialog.close();
   });
 
 
@@ -146,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // most likely a bad passphrase / auth tag mismatch
             const errorText = document.getElementById('error');
             errorText.innerText = "Invalid passphrase or corrupted data.";
-            dialog.showModal();
+            errorDialog.showModal();
           }
           // re‑throw anything else
           throw err;

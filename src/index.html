@@ -8,7 +8,7 @@
   <link rel='stylesheet' media='all' href='/main.css' />
 </head>
 <body>
-  <dialog>
+  <dialog id='error-dialog'>
     <h3>Error</h3>
     <p id='error'></p>
     <div class='text-center'>
@@ -59,7 +59,49 @@
       <div hidden id='linkDiv'></div>
       {{ end }}
     </div>
-    <footer>Made with ♥ by <a href='https://www.deltablot.com' target='_blank' rel='noreferrer'>Deltablot</a></footer>
+    <dialog id='tos'>
+      <h3>Terms of use</h3>
+      <p><em>Last updated: April 18, 2025</em></p>
+      <ol>
+        <li>
+          <strong>Acceptance</strong><br>
+          By using Partage (“the Service”), you agree to these Terms. If you don’t agree, please don’t use the Service.
+        </li>
+        <li>
+          <strong>Permitted Use</strong><br>
+          You may upload, share and download files within the size and quantity limits set by the Service. You are responsible for keeping any access keys or links secure.
+        </li>
+        <li>
+          <strong>Prohibited Content</strong><br>
+          No unlawful, infringing, defamatory, harmful or malicious files. No distribution of malware, phishing materials, or any content that violates privacy or intellectual‑property rights.
+        </li>
+        <li>
+          <strong>Retention & Removal</strong><br>
+          Files expire automatically based on the deadline you set. We reserve the right to remove files that breach these Terms or exceed storage limits.
+        </li>
+        <li>
+          <strong>Privacy</strong><br>
+          We collect minimal metadata (file IDs, timestamps). No personal data is shared without your consent. See our Privacy Policy for details.
+        </li>
+        <li>
+          <strong>Liability Disclaimer</strong><br>
+          The Service is provided “as‑is.” We aren’t liable for data loss, unauthorized access, or damages arising from use or misuse.
+        </li>
+        <li>
+          <strong>Changes to Terms</strong><br>
+          We may update these Terms at any time. Continued use after changes means you accept the new Terms.
+        </li>
+        <li>
+          <strong>Contact</strong><br>
+          For questions or notices, <a href='https://www.deltablot.com/contact' target='_blank' rel='noreferrer'>contact us</a>.
+        </li>
+      </ol>
+      <p>Thank you for using Partage. Keep your files safe!</p>
+      <div class='text-center'>
+        <button autofocus>Close</button>
+      </div>
+    </dialog>
+    <footer><a href='#' id='tos-link'>Terms of use</a> | <a href='https://www.deltablot.com/privacy/' target='_blank' rel='noreferrer'>Privacy policy</a> | <a href='https://github.com/deltablot/partage?tab=readme-ov-file#partage' target='_blank' rel='noreferrer'>Source code</a> | Made with ♥ by <a href='https://www.deltablot.com' target='_blank' rel='noreferrer'>Deltablot</a></footer>
   </div>
   <span hidden id='x-partage-key'>{{ .PartageKey }}</span>
   <script type='module' src='/index.js'></script>

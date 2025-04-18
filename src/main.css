@@ -178,6 +178,9 @@ input.get-link {
     color: var(--black);
 }
 
+#tos {
+    min-width: 50%;
+}
 
 footer {
     background: var(--black);
