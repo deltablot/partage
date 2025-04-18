@@ -43,7 +43,7 @@ Configuration variables:
 
 ### Running the service
 
-By default, the program listens on port `8080`.
+By default, the program listens on port `8080`. You **need** to have a reverse proxy in front of it, terminating TLS, as it only listens in HTTP, but the app requires access through HTTPS.
 
 ~~~bash
 # quick and dirty on localhost (no persistence)
@@ -54,7 +54,7 @@ mkdir files
 # it is the userid running inside the container
 sudo chown 65534:65534 files
 # expose this service through a TLS terminating reverse proxy
-docker run -e SITE_URL=https://partage.example.com --rm --name partage ghcr.io/delatblot/partage
+docker run -e SITE_URL=https://partage.example.com --rm --name partage -v $(pwd)/files:/var/partage ghcr.io/delatblot/partage
 ~~~
 
 See [docker-compose.yml](./docker-compose.yml.dist) example file.
