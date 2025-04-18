@@ -2,8 +2,8 @@ name: ci
 
 on:
   push:
-    tags:
-      - '*'
+    #tags:
+    #  - '*'
 
 jobs:
   docker:
@@ -30,6 +30,4 @@ jobs:
           push: true
           build-args: |
               VERSION=${{ github.ref_name }}
-          tags:
-            - ghcr.io/deltablot/partage:latest
-            - ghcr.io/deltablot/partage:{{ github.ref_name }}
+          tags: ghcr.io/deltablot/partage:latest,ghcr.io/deltablot/partage:{{ github.ref_name }}
