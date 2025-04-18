@@ -390,6 +390,10 @@ func main() {
 	http.HandleFunc("POST /api/v1/parts", postHandler)
 	http.HandleFunc("GET /api/v1/part/", getFileHandler)
 	http.HandleFunc("GET /favicon.ico", serveAsset)
+	http.HandleFunc("GET /healthcheck", func(w http.ResponseWriter, r *http.Request) {
+		// 204 No Content
+		w.WriteHeader(http.StatusNoContent)
+	})
 
 	// in prod we embed the files, but in dev we serve them directly to avoid having to recompile binary after a change
 	if os.Getenv("DEV") == "1" {
