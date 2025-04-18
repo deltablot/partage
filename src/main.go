@@ -248,11 +248,13 @@ func serveIndexTemplate(w http.ResponseWriter, r *http.Request) {
 		PartageKey  string
 		SvgLogo     string
 		MaxFileSize int64
+		Version     string
 	}{
 		GetPage:     getPage,
 		PartageKey:  partageKey,
 		SvgLogo:     os.Getenv("SVG_LOGO"),
 		MaxFileSize: maxFileSize,
+		Version:     partageVersion,
 	}
 	w.Header().Set("Content-Security-Policy",
 		"default-src 'self'; "+
