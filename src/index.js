@@ -1,7 +1,7 @@
 /**
  * partage - © 2025 Nicolas CARPi, Deltablot
  */
-import { formatUnixTimestamp } from './utils.js';
+import { formatUnixTimestamp, formatSize } from './utils.js';
 import { Partage } from './partage.js';
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
     form.addEventListener('submit', async function(event) {
       event.preventDefault();
 
+      // detect cancel button being clicked
       const submitterType = event.submitter.getAttribute('type');
       if (submitterType === 'cancel') {
         form.reset();
@@ -51,13 +52,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // get file
       const fileInput = form.querySelector('input[type="file"]');
-      const file = fileInput.files[0];
+      let file = {
+        type: 'application/x-empty',
+        name: undefined,
+      }
+      if (fileInput.files.length > 0) {
+        file = fileInput.files[0];
+      }
+
+      // get text
+      const text = form.querySelector('textarea').value;
 
       // get passphrase
       const passphrase = document.querySelector('input[name="passphrase"]').value;
 
       // do the work
-      const encryptedBlob = await partage.getEncryptedBlob(file, passphrase);
+      const encryptedBlob = await partage.getEncryptedBlob(file, text, passphrase);
 
       // send the encrypted data for storage
       const formData = new FormData();
@@ -156,15 +166,29 @@ document.addEventListener('DOMContentLoaded', function() {
           const metadataLength = dv.getUint16(0, false);
           const metadataEncoded = clearView.slice(2, metadataLength + 2);
           const metadata = JSON.parse(new TextDecoder().decode(metadataEncoded));
-          const file = clearView.slice(metadataLength + 2);
-          // Create a Blob from the decrypted data and trigger a download.
-          const blob = new Blob([file], { type: metadata.content_type });
-          const link = document.createElement("a");
-          link.href = URL.createObjectURL(blob);
-          link.download = metadata.filename;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+          document.getElementById('getForm').remove();
+          if (metadata.text) {
+            const textDiv = document.getElementById('textDiv');
+            textDiv.removeAttribute('hidden');
+            textDiv.querySelector('p.text').innerText = metadata.text;
+          }
+
+          if (metadata.filename) {
+            const downloadDiv = document.getElementById('downloadDiv');
+            downloadDiv.querySelector('p').innerText = `${metadata.filename} (${formatSize(metadata.size)})`;
+            downloadDiv.addEventListener('click', () => {
+              const file = clearView.slice(metadataLength + 2);
+              // Create a Blob from the decrypted data and trigger a download.
+              const blob = new Blob([file], { type: metadata.content_type });
+              const link = document.createElement("a");
+              link.href = URL.createObjectURL(blob);
+              link.download = metadata.filename;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            });
+            downloadDiv.removeAttribute('hidden');
+          }
         } catch (err) {
           // WebCrypto failures in decrypt() all come back as a DOMException
           if (err instanceof DOMException && err.name === "OperationError") {

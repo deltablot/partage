@@ -15,21 +15,26 @@ export class Partage {
     this.iv = crypto.getRandomValues(new Uint8Array(this.ivLength));
   }
 
-  getMetadata(file) {
+  getMetadata(file, text) {
     return {
       content_type: file.type,
       created_at: new Date().toISOString(),
       filename: file.name,
+      size: file.size,
+      text: text,
     };
   }
 
-  async getEncryptedBlob(file, passphrase) {
-    const arrayBuffer = await file.arrayBuffer();
+  async getEncryptedBlob(file, text, passphrase) {
+    let arrayBuffer = new ArrayBuffer(0);
+    if (file.size > 0) {
+      arrayBuffer = await file.arrayBuffer();
+    }
     // import passphrase as key for derivation
     const baseKey = await this.getBaseKey(passphrase);
     const derivedKey = await this.getDerivedKey(baseKey, ['encrypt']);
     // METADATA
-    const metadata = this.getMetadata(file);
+    const metadata = this.getMetadata(file, text);
     const metadataEncoded = this.encoder.encode(JSON.stringify(metadata));
     // header will store the metadata length
     const header = new Uint8Array(this.headerLength);

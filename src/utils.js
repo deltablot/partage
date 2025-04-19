@@ -33,3 +33,12 @@ export function formatUnixTimestamp(unixTimestampStr) {
   const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
   return rtf.format(diff, unit);
 }
+
+export function formatSize(size) {
+  return new Intl.NumberFormat('en', {
+  style: 'unit',
+  unit: 'megabyte',
+  unitDisplay: 'short',
+  maximumFractionDigits: 2,
+  }).format(size / (1024 * 1024));
+};

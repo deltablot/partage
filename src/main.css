@@ -140,9 +140,32 @@ input {
     height: 2.3rem;
 }
 
+textarea {
+    padding: 10px;
+    width: 100%;
+    border-radius: 5px;
+    border: 1px solid var(--black);
+}
+
+.text {
+    background-color: #fff;
+    border: 1px solid var(--black);
+    border-radius: 5px;
+    padding: 5px;
+    width: 70%;
+    margin: auto;
+}
+
+.helper {
+    margin: 10px 0 0 0;
+    text-align: start;
+    font-size: 0.8rem;
+    color: var(--medium);
+}
+
 input[type="file"] {
     background-color: #fff;
-    margin-top: 25px;
+    margin-top: 10px;
     padding: 25px 10px;
     width: 100%;
     border: 2px dashed var(--black);

@@ -28,20 +28,32 @@
           <button type='button' class='toggle-eye' aria-label='Show passphrase'>👁</button>
         </div>
         <div>
-          <button type='submit'>Download</button>
+          <button type='submit'>Decrypt</button>
         </div>
       </form>
+      <div>
+        <div hidden id='textDiv'>
+          <p>Decrypted text:</p>
+          <p class='text'></p>
+        </div>
+        <div hidden id='downloadDiv'>
+          <p></p>
+          <button type='button' id='downloadBtn'>Download decrypted file</button>
+        </div>
+      </div>
       {{ else }}
       <h1>Share a file</h1>
       <h2 id='subtitle'>Select a file to create a secure share link</h2>
       <div class='form-container'>
       <form id='uploadForm' class='' action='/api/v1/parts' method='POST' enctype='multipart/form-data'>
         <div class='section-header flex-row'>
-          <h3>Select a file</h3>
+          <h3>Add your data</h3>
           <span>Size limit: {{ .MaxFileSize }} Mb</span>
         </div>
+        <p class='helper'>You can upload a file, add text, or both.</p>
         <div>
-          <input aria-label='Select a file' type='file' required name='file' />
+          <input aria-label='Select a file' type='file' name='file' />
+          <textarea aria-label='Paste some text...' placeholder='Paste some text' name='text'></textarea>
         </div>
 
         <div class='section-header flex-row'>
