@@ -23,8 +23,8 @@
       <h1>Download your file</h1>
       <p id='expiresAt'></p>
       <form id='getForm' class='d-flex flex-column'>
-        <div class='passphrase password-wrapper'>
-          <input type='password' autocomplete='off' required name='passphrase' id='passphrase' placeholder='Enter the secret passphrase provided with this URL' />
+        <div class='password-wrapper'>
+          <input aria-label='Passphrase' type='password' autocomplete='off' required name='passphrase' id='passphrase' placeholder='Enter the secret passphrase provided with this URL' />
           <button type='button' class='toggle-eye' aria-label='Show passphrase'>👁</button>
         </div>
         <div>
@@ -41,7 +41,7 @@
           <span>Size limit: {{ .MaxFileSize }} Mb</span>
         </div>
         <div>
-          <input type='file' required name='file' />
+          <input aria-label='Select a file' type='file' required name='file' />
         </div>
 
         <div class='section-header flex-row'>
@@ -50,7 +50,7 @@
         </div>
         <div>
           <div class='password-wrapper'>
-            <input id='passphrase' autocomplete='off' required name='passphrase' type='password' placeholder='Enter your passphrase'>
+            <input aria-label='Passphrase' id='passphrase' autocomplete='off' required name='passphrase' type='password' placeholder='Enter your passphrase'>
             <button type='button' class='toggle-eye' aria-label='Show passphrase'>👁</button>
           </div>
         </div>
@@ -61,7 +61,7 @@
         </div>
 
         <div>
-          <select required name='deadline'>
+          <select aria-label='Expiration delay' required name='deadline'>
             <option value='1h'>1 hour</option>
             <option value='24h'>1 day</option>
             <option value='72h'>3 days</option>
