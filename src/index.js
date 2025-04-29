@@ -1,7 +1,7 @@
 /**
  * partage - © 2025 Nicolas CARPi, Deltablot
  */
-import { formatUnixTimestamp, formatSize } from './utils.js';
+import { formatUnixTimestamp, formatSize, mkSpin } from './utils.js';
 import { Partage } from './partage.js';
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -49,6 +49,9 @@ document.addEventListener('DOMContentLoaded', function() {
         form.reset();
         return;
       }
+
+      // change the button to show progress
+      mkSpin(form.querySelector('button[type="submit"]'));
 
       // get file
       const fileInput = form.querySelector('input[type="file"]');
@@ -132,6 +135,8 @@ document.addEventListener('DOMContentLoaded', function() {
         alert("Please provide both a passphrase and UUID.");
         return;
       }
+      // change the button to show progress
+      mkSpin(getForm.querySelector('button[type="submit"]'));
       try {
         // Fetch the encrypted file as an ArrayBuffer.
         const response = await fetch(`/api/v1/part/${uuid}`);

@@ -42,3 +42,15 @@ export function formatSize(size) {
   maximumFractionDigits: 2,
   }).format(size / (1024 * 1024));
 };
+
+export function mkSpin(el) {
+  // we want the button to keep the same size, so store width/height as style attribute
+  const { width, height } = el.getBoundingClientRect();
+  el.style.width = `${width}px`;
+  el.style.height = `${height}px`;
+  // keep the old html around so we can restore it
+  const elOldHTML = el.innerHTML;
+  el.setAttribute('disabled', 'disabled');
+  el.innerHTML = '<span class="spinner"></span>';
+  return elOldHTML;
+}
