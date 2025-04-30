@@ -20,8 +20,8 @@
     <nav><a href='/'>Partage</a></nav>
     <div class='content'>
       {{ if .GetPage }}
-      <h1>Download your file</h1>
-      <p id='expiresAt'></p>
+      <h1>Access your file</h1>
+      <h2 id='expiresAt'></h2>
       <form id='getForm' class='d-flex flex-column'>
         <div class='password-wrapper'>
           <input aria-label='Passphrase' type='password' autocomplete='off' required name='passphrase' id='passphrase' placeholder='Enter the secret passphrase provided with this URL' />
@@ -32,13 +32,17 @@
         </div>
       </form>
       <div>
-        <div hidden id='textDiv'>
-          <p>Decrypted text:</p>
-          <p class='text'></p>
-        </div>
         <div hidden id='downloadDiv'>
-          <p></p>
-          <button type='button' id='downloadBtn'>Download decrypted file</button>
+          <hr class='long'>
+          <p>
+          <span id='filename' class='text-strong'></span><span id='filesize' class='text-weak text-sm'></span>
+          </p>
+          <button type='button' id='downloadBtn'>Download file</button>
+        </div>
+        <div hidden id='textDiv'>
+          <hr class='long'>
+          <p class='text'></p>
+          <button type='button' id='copyBtn'>Copy to clipboard</button>
         </div>
       </div>
       {{ else }}

@@ -36,7 +36,6 @@ document.addEventListener('DOMContentLoaded', function() {
     tosDialog.close();
   });
 
-
   // INDEX
   const form = document.getElementById('uploadForm');
   if (form) {
@@ -135,15 +134,15 @@ document.addEventListener('DOMContentLoaded', function() {
         alert("Please provide both a passphrase and UUID.");
         return;
       }
-      // change the button to show progress
-      mkSpin(getForm.querySelector('button[type="submit"]'));
       try {
         // Fetch the encrypted file as an ArrayBuffer.
         const response = await fetch(`/api/v1/part/${uuid}`);
         if (!response.ok) {
-          alert("Failed to download file.");
+          alert("Failed to download file. Maybe it is expired?");
           return;
         }
+        // change the button to show progress
+        mkSpin(getForm.querySelector('button[type="submit"]'));
         const encryptedDataBuffer = await response.arrayBuffer();
         const dataView = new Uint8Array(encryptedDataBuffer);
 
@@ -175,13 +174,25 @@ document.addEventListener('DOMContentLoaded', function() {
           if (metadata.text) {
             const textDiv = document.getElementById('textDiv');
             textDiv.removeAttribute('hidden');
-            textDiv.querySelector('p.text').innerText = metadata.text;
+            const textDivContent = textDiv.querySelector('p.text');
+            textDivContent.innerText = metadata.text;
+            // copy to clipboard button
+            const copyBtn = document.getElementById('copyBtn');
+            copyBtn.addEventListener('click', async () => {
+              await navigator.clipboard.writeText(metadata.text);
+              copyBtn.innerText = 'Copied to clipboard!';
+              setTimeout(() => {
+                copyBtn.innerText = 'Copy to clipboard';
+              }, 2000);
+            });
           }
 
           if (metadata.filename) {
-            const downloadDiv = document.getElementById('downloadDiv');
-            downloadDiv.querySelector('p').innerText = `${metadata.filename} (${formatSize(metadata.size)})`;
-            downloadDiv.addEventListener('click', () => {
+            document.getElementById('filename').innerText = metadata.filename;
+            document.getElementById('filesize').innerText = formatSize(metadata.size);
+
+            const downloadBtn = document.getElementById('downloadBtn');
+            downloadBtn.addEventListener('click', () => {
               const file = clearView.slice(metadataLength + 2);
               // Create a Blob from the decrypted data and trigger a download.
               const blob = new Blob([file], { type: metadata.content_type });

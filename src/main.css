@@ -131,6 +131,33 @@ hr {
     width: 20%;
 }
 
+hr.long {
+    color: var(--highlight);
+    width: 50%;
+}
+
+.text-strong {
+    font-weight: bold;
+}
+
+.text-weak {
+    color: var(--medium);
+}
+
+.text-sm {
+    font-size: 80%;
+}
+
+#filesize {
+    margin-left: 10px;
+}
+
+#textDiv > p {
+    margin-top: 25px;
+    width: 50%;
+}
+
+
 input {
     border: 1px solid #ced4da;
     transition: box-shadow 0.2s ease;
