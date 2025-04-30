@@ -23,6 +23,14 @@ The css and javascript assets are minified and served with brotli compression. T
 
 If you're interested in having a file sharing service that is fast, easy to deploy, secure and pleasant to use, then use **Partage**.
 
+### Lighthouse report
+
+![lighthouse report](./assets/lighthouse-report.gif)
+
+### Mozilla's observatory grading
+
+![mozilla observatory](./assets/observatory.png)
+
 ## Deploy Partage
 
 ### Configuration variables
