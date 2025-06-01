@@ -23,6 +23,9 @@ RUN bash build.sh
 FROM golang:1.24-alpine AS gobuilder
 # this is set at build time
 ARG VERSION=docker
+# get logo
+RUN apk add --no-cache curl
+ARG SVG_LOGO_URL="https://www.deltablot.com/img/deltablot-purple.svg"
 WORKDIR /app
 # install dependencies
 COPY go.mod .
@@ -36,7 +39,8 @@ COPY --from=bundler /home/node/src/dist src/dist
 # -w turn off DWARF debugging
 # -s turn off symbol table
 # change version at linking time
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s -X 'main.partageVersion=${VERSION}'" -o /partage ./src/main.go
+RUN export SVG_LOGO=$(curl -fsL ${SVG_LOGO_URL}) \
+    && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s -X 'main.svgLogo=${SVG_LOGO}' -X 'main.partageVersion=${VERSION}'" -o /partage ./src/main.go
 
 # use busybox to create a correctly chown dir
 FROM busybox:1.37-uclibc AS prepare

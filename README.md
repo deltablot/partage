@@ -33,6 +33,10 @@ If you're interested in having a file sharing service that is fast, easy to depl
 
 ## Deploy Partage
 
+### Build variables
+
+Give it an svg file URL with `--build-arg SVG_LOGO_URL=https://example.com/logo.svg` to inject a different logo at build time.
+
 ### Configuration variables
 
 The application is configured through environment variables.
@@ -47,7 +51,6 @@ Configuration variables:
 | `MAX_FILE_SIZE_MB`    | maximum size of uploaded files in Mb                | 1024                | 2048                          |
 | `MAX_TOTAL_FILES`     | maximum number of uploaded files                    | 24                  | 1337                          |
 | `CLEANUP_TIMER_MIN`   | interval of time in minutes between pruning of old  | 10                  | 60                            |
-| `SVG_LOGO`            | svg content for the logo                            | ""                  | `<some svg data>`             |
 
 ### Running the service
 

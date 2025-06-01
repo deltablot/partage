@@ -50,6 +50,8 @@ type Part struct {
 // this will be overwritten during docker build
 var partageVersion string = "dev"
 
+var svgLogo string = ""
+
 var storageDirectory string
 
 var maxFileSizeStr = "1024"
@@ -252,7 +254,7 @@ func serveIndexTemplate(w http.ResponseWriter, r *http.Request) {
 	}{
 		GetPage:     getPage,
 		PartageKey:  partageKey,
-		SvgLogo:     os.Getenv("SVG_LOGO"),
+		SvgLogo:     svgLogo,
 		MaxFileSize: maxFileSize,
 		Version:     partageVersion,
 	}
