@@ -67,7 +67,7 @@ var siteUrl = "http://localhost"
 // uuidv7TimestampRegex ensures that the filename follows the format:
 // UUID with version 7 (third group starts with '7') and then a hyphen and a Unix timestamp.
 // For example: "123e4567-e89b-7d89-a456-426614174000-1678932930"
-var uuidv7TimestampRegex = regexp.MustCompile(`^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-7[a-fA-F0-9]{3}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}-\d+$`)
+var uuidv7TimestampRegex = regexp.MustCompile(`^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-7[a-fA-F0-9]{3}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}.\d+$`)
 
 // partageKey holds the randomly generated key
 var partageKey string
@@ -193,7 +193,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 
 	// For demonstration, write the uploaded file to disk.
 	// In production, this could be stored in a database or object storage.
-	destFilePath := storageDirectory + "/" + part.Id + "-" + strconv.FormatInt(ts, 10)
+	destFilePath := storageDirectory + "/" + part.Id + "." + strconv.FormatInt(ts, 10)
 	dst, err := os.Create(destFilePath)
 	if err != nil {
 		http.Error(w, "Error creating file: "+err.Error(), http.StatusInternalServerError)
@@ -297,16 +297,16 @@ func cleanExpiredFiles(folder string) error {
 		}
 		fileName := entry.Name()
 
-		// Split the filename on "-" and get the last part.
-		parts := strings.Split(fileName, "-")
+		// Split the filename on "-" and get the timestamp part.
+		parts := strings.Split(fileName, ".")
 		if len(parts) < 2 {
 			// Skip files that don't match the expected naming pattern.
 			continue
 		}
-		lastPart := parts[len(parts)-1]
+		tsPart := parts[1]
 
 		// Parse the resulting string as a Unix timestamp.
-		timestamp, err := strconv.ParseInt(lastPart, 10, 64)
+		timestamp, err := strconv.ParseInt(tsPart, 10, 64)
 		if err != nil {
 			errorLogger.Printf("skipping file %q: error parsing timestamp: %v\n", fileName, err)
 			continue

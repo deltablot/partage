@@ -66,7 +66,13 @@ document.addEventListener('DOMContentLoaded', function() {
       const text = form.querySelector('textarea').value;
 
       // get passphrase
-      const passphrase = document.querySelector('input[name="passphrase"]').value;
+      let passphraseInUrl = '';
+      let passphrase = document.querySelector('input[name="passphrase"]').value;
+      if (!passphrase) {
+        // just grab the last part of it, we don't need the full randomness of uuid
+        passphrase = crypto.randomUUID().split('-')[4];
+        passphraseInUrl = `.${passphrase}`;
+      }
 
       // do the work
       const encryptedBlob = await partage.getEncryptedBlob(file, text, passphrase);
@@ -91,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
           document.getElementById('anotherDiv').removeAttribute('hidden');
           linkDiv.removeAttribute('hidden');
           const link = document.createElement('input');
-          const linkUrl = `${document.location}get#${json.id}-${json.expires_at}`;
+          const linkUrl = `${document.location}get#${json.id}.${json.expires_at}${passphraseInUrl}`;
           link.value = linkUrl;
           link.setAttribute('readonly', 'readonly');
           link.addEventListener('focus', async () => {
@@ -108,7 +114,11 @@ document.addEventListener('DOMContentLoaded', function() {
           linkDiv.innerText = '';
           linkDiv.appendChild(link);
           form.remove();
-          document.getElementById('subtitle').innerText = 'Copy this link and send it with the passphrase';
+          let subtitle = 'Copy this link and send it by email. It is recommended to send the passphrase through a different channel';
+          if (passphraseInUrl) {
+            subtitle = 'Copy this link and send it by email';
+          }
+          document.getElementById('subtitle').innerText = subtitle;
         } else {
           alert(await response.text());
         }
@@ -123,20 +133,30 @@ document.addEventListener('DOMContentLoaded', function() {
   const getForm = document.getElementById("getForm");
   if (getForm) {
     // we slice it to remove the leading '#'
-    const uuid = location.hash.slice(1);
-    const expiresAt = uuid.split('-').pop();
+    const hashParam = location.hash.slice(1);
+    const splitParams = hashParam.split('.');
+    const uuid = splitParams[0];
+    const expiresAt = splitParams[1];
+    // might be empty
+    const passphraseInUrl = splitParams[2];
+    const passphraseInput = document.querySelector('input[name="passphrase"]');
+    if (passphraseInUrl) {
+      passphraseInput.setAttribute('hidden', 'hidden');
+      document.querySelector('.toggle-eye').setAttribute('hidden', 'hidden');
+      passphraseInput.value = passphraseInUrl;
+    }
     const expiresAtEl = document.getElementById('expiresAt');
     expiresAtEl.innerText = `Expires ${formatUnixTimestamp(expiresAt)}`;
     getForm.addEventListener("submit", async (event) => {
       event.preventDefault();
-      const passphrase = document.querySelector('input[name="passphrase"]').value;
+      const passphrase = passphraseInput.value;
       if (!passphrase || !uuid) {
         alert("Please provide both a passphrase and UUID.");
         return;
       }
       try {
         // Fetch the encrypted file as an ArrayBuffer.
-        const response = await fetch(`/api/v1/part/${uuid}`);
+        const response = await fetch(`/api/v1/part/${uuid}.${expiresAt}`);
         if (!response.ok) {
           alert("Failed to download file. Maybe it is expired?");
           return;
