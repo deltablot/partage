@@ -2,8 +2,7 @@ name: ci
 
 on:
   push:
-    #tags:
-    #  - '*'
+    branches: ["master"]
 
 jobs:
   docker:
