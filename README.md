@@ -58,7 +58,7 @@ By default, the program listens on port `8080`. You **need** to have a reverse p
 
 ~~~bash
 # quick and dirty on localhost (no persistence)
-docker run -p 8080:8080 -e SITE_URL=http://localhost:8080 --rm --name partage ghcr.io/delatblot/partage
+docker run -p 8080:8080 -e SITE_URL=http://localhost:8080 --rm --name partage ghcr.io/deltablot/partage
 # or with a volume for persistence
 mkdir files
 # this id/gid corresponds to nobody user in most cases
