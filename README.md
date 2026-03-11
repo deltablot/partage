@@ -65,7 +65,7 @@ mkdir files
 # it is the userid running inside the container
 sudo chown 65534:65534 files
 # expose this service through a TLS terminating reverse proxy
-docker run -e SITE_URL=https://partage.example.com --rm --name partage -v $(pwd)/files:/var/partage ghcr.io/delatblot/partage
+docker run -e SITE_URL=https://partage.example.com --rm --name partage -v $(pwd)/files:/var/partage ghcr.io/deltablot/partage
 ~~~
 
 See [docker-compose.yml](./docker-compose.yml.dist) example file.
