@@ -36,6 +36,18 @@ document.addEventListener('DOMContentLoaded', function() {
     tosDialog.close();
   });
 
+  // copy to clipboard function
+  const copyToClipboard = (btn, linkOrMetadata) => {
+    const copyBtn = document.getElementById(btn);
+    copyBtn.addEventListener('click', async () => {
+      await navigator.clipboard.writeText(linkOrMetadata);
+      copyBtn.innerText = 'Copied to clipboard!';
+      setTimeout(() => {
+        copyBtn.innerText = 'Copy to clipboard';
+      }, 2000);
+    });
+  }
+
   // INDEX
   const form = document.getElementById('uploadForm');
   if (form) {
@@ -108,7 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
             link.select();
             await navigator.clipboard.writeText(link.value);
           });
-
+          copyToClipboard('copyLinkBtn', link.value);
           link.innerText = linkUrl;
           link.classList.add('get-link');
           linkDiv.innerText = '';
@@ -196,15 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
             textDiv.removeAttribute('hidden');
             const textDivContent = textDiv.querySelector('p.text');
             textDivContent.innerText = metadata.text;
-            // copy to clipboard button
-            const copyBtn = document.getElementById('copyBtn');
-            copyBtn.addEventListener('click', async () => {
-              await navigator.clipboard.writeText(metadata.text);
-              copyBtn.innerText = 'Copied to clipboard!';
-              setTimeout(() => {
-                copyBtn.innerText = 'Copy to clipboard';
-              }, 2000);
-            });
+            copyToClipboard('copyBtn', metadata.text);
           }
 
           if (metadata.filename) {
