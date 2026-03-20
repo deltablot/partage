@@ -154,7 +154,8 @@ hr.long {
 
 #textDiv > p {
     margin-top: 25px;
-    width: 100%;
+    overflow: scroll;
+    width: 75%;
 }
 
 
