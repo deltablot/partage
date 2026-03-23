@@ -108,8 +108,11 @@ document.addEventListener('DOMContentLoaded', function() {
           const linkDiv = document.getElementById('linkDiv');
           document.getElementById('anotherDiv').removeAttribute('hidden');
           linkDiv.removeAttribute('hidden');
+          linkDiv.classList.add('input-group');
           const link = document.createElement('input');
           const linkUrl = `${document.location}get#${json.id}.${json.expires_at}${passphraseInUrl}`;
+          const btn = document.createElement('button');
+          btn.classList.add('btn', 'btn-outline-secondary');
           link.value = linkUrl;
           link.setAttribute('readonly', 'readonly');
           link.addEventListener('focus', async () => {
@@ -120,11 +123,15 @@ document.addEventListener('DOMContentLoaded', function() {
             link.select();
             await navigator.clipboard.writeText(link.value);
           });
-          copyToClipboard('copyLinkBtn', link.value);
+          // copyToClipboard('copyLinkBtn', link.value);
           link.innerText = linkUrl;
-          link.classList.add('get-link');
+          link.classList.add('get-link', 'form-control');
           linkDiv.innerText = '';
           linkDiv.appendChild(link);
+          linkDiv.appendChild(btn);
+          btn.innerHTML = '📋';
+            btn.setAttribute('id', 'test');
+          //copyToClipboard(btn, link.value);
           form.remove();
           let subtitle = 'Copy this link and send it by email. It is recommended to send the passphrase through a different channel';
           if (passphraseInUrl) {
@@ -140,6 +147,22 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
+    /*
+<div class="input-group mb-3">
+  <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="button-addon2">
+  <button class="btn btn-outline-secondary" type="button" id="button-addon2">Button</button>
+</div>
+button {
+    background-color: var(--white);
+    margin-top: 10px;
+    padding: 6px 3px 11px 3px;
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--white);
+    font-size: 1.2rem;
+    border-radius: 5px;
+}
+*/
 
   // GET
   const getForm = document.getElementById("getForm");
