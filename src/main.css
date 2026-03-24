@@ -309,12 +309,68 @@ select[name="deadline"] {
     }
 }
 
+#linkDiv.input-group {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  justify-content: center;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto 42px auto;
+}
 
-input.get-link {
-    width: 70ch;
-    text-align: center;
-    margin: 0 auto 42px auto;
-    color: var(--black);
+#linkDiv.input-group .get-link {
+  width: 70ch;
+  max-width: 100%;
+  margin: 0;
+  height: 2.3rem;
+  text-align: center;
+  color: var(--black);
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+#linkDiv.input-group #clipboard {
+  margin: 0;
+  width: auto;
+  min-width: 2.8rem;
+  height: 2.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.75rem;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  white-space: nowrap;
+}
+
+#linkDiv.input-group input {
+  margin-bottom: 0;
+}
+
+#linkDiv.input-group button {
+  margin-top: 0;
+}
+
+.clipboard-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-left: 0;
+}
+
+.clipboard-status {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 0.8rem;
+  text-align: center;
+  white-space: nowrap;
+  width: max-content;
 }
 
 #tos {

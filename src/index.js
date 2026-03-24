@@ -110,9 +110,11 @@ document.addEventListener('DOMContentLoaded', function() {
           linkDiv.removeAttribute('hidden');
           linkDiv.classList.add('input-group');
           const link = document.createElement('input');
-          const linkUrl = `${document.location}get#${json.id}.${json.expires_at}${passphraseInUrl}`;
           const btn = document.createElement('button');
-          btn.classList.add('btn', 'btn-outline-secondary');
+          const status = document.createElement('div');
+          const btnWrapper = document.createElement('div');
+          const linkUrl = `${document.location}get#${json.id}.${json.expires_at}${passphraseInUrl}`;
+
           link.value = linkUrl;
           link.setAttribute('readonly', 'readonly');
           link.addEventListener('focus', async () => {
@@ -123,15 +125,40 @@ document.addEventListener('DOMContentLoaded', function() {
             link.select();
             await navigator.clipboard.writeText(link.value);
           });
-          // copyToClipboard('copyLinkBtn', link.value);
           link.innerText = linkUrl;
           link.classList.add('get-link', 'form-control');
           linkDiv.innerText = '';
           linkDiv.appendChild(link);
-          linkDiv.appendChild(btn);
-          btn.innerHTML = '📋';
-            btn.setAttribute('id', 'test');
-          //copyToClipboard(btn, link.value);
+          linkDiv.appendChild(btnWrapper);
+
+          btn.type = 'button';
+          btn.classList.add('btn-ghost', 'btn-outline-secondary');
+          btn.innerHTML = '⧉';
+          btn.setAttribute('id', 'clipboard');
+          btn.setAttribute('title', 'Copy to clipboard');
+          btn.setAttribute('aria-label', 'Copy to clipboard');
+          btn.setAttribute('data-action', 'copy');
+
+          status.classList.add('helper', 'clipboard-status');
+          status.setAttribute('role', 'status');
+          status.setAttribute('aria-live', 'polite');
+          status.setAttribute('aria-atomic', 'true');
+          status.textContent = '';
+          btnWrapper.classList.add('clipboard-wrapper');
+          btnWrapper.appendChild(btn);
+          btnWrapper.appendChild(status);
+
+          const copyBtn = document.querySelector('[data-action="copy"]');
+          btn.addEventListener('click', async () => {
+            await navigator.clipboard.writeText(link.value);
+            copyBtn.innerText = '✔';
+             status.textContent = 'Copied to clipboard';
+
+            setTimeout(() => {
+              copyBtn.innerHTML = '⧉';
+             status.textContent = '';
+            }, 2000);
+          });
           form.remove();
           let subtitle = 'Copy this link and send it by email. It is recommended to send the passphrase through a different channel';
           if (passphraseInUrl) {
@@ -147,22 +174,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-    /*
-<div class="input-group mb-3">
-  <input type="text" class="form-control" placeholder="Recipient's username" aria-label="Recipient's username" aria-describedby="button-addon2">
-  <button class="btn btn-outline-secondary" type="button" id="button-addon2">Button</button>
-</div>
-button {
-    background-color: var(--white);
-    margin-top: 10px;
-    padding: 6px 3px 11px 3px;
-    cursor: pointer;
-    font-weight: 700;
-    color: var(--white);
-    font-size: 1.2rem;
-    border-radius: 5px;
-}
-*/
 
   // GET
   const getForm = document.getElementById("getForm");
