@@ -316,25 +316,24 @@ select[name="deadline"] {
   justify-content: center;
   width: fit-content;
   max-width: 100%;
-  margin: 0 auto 42px auto;
+  margin: 0 auto 42px;
 }
 
 #linkDiv.input-group .get-link {
   width: 70ch;
   max-width: 100%;
   margin: 0;
-  height: 2.3rem;
   text-align: center;
   color: var(--black);
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-#linkDiv.input-group #clipboard {
+#linkDiv.input-group button {
   margin: 0;
-  width: auto;
+  /*width: auto;*/
   min-width: 2.8rem;
-  height: 2.3rem;
+  /*height: 2.3rem;*/
   display: flex;
   align-items: center;
   justify-content: center;
@@ -344,12 +343,9 @@ select[name="deadline"] {
   white-space: nowrap;
 }
 
-#linkDiv.input-group input {
-  margin-bottom: 0;
-}
-
+#linkDiv.input-group input,
 #linkDiv.input-group button {
-  margin-top: 0;
+  height: 2.3rem;
 }
 
 .clipboard-wrapper {
@@ -357,8 +353,6 @@ select[name="deadline"] {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: flex-start;
-  margin-left: 0;
 }
 
 .clipboard-status {

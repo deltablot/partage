@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
           btn.type = 'button';
           btn.classList.add('btn-ghost', 'btn-outline-secondary');
-          btn.innerHTML = '⧉';
+          btn.textContent = '⧉';
           btn.setAttribute('id', 'clipboard');
           btn.setAttribute('title', 'Copy to clipboard');
           btn.setAttribute('aria-label', 'Copy to clipboard');
@@ -148,15 +148,13 @@ document.addEventListener('DOMContentLoaded', function() {
           btnWrapper.appendChild(btn);
           btnWrapper.appendChild(status);
 
-          const copyBtn = document.querySelector('[data-action="copy"]');
           btn.addEventListener('click', async () => {
             await navigator.clipboard.writeText(link.value);
-            copyBtn.innerText = '✔';
-             status.textContent = 'Copied to clipboard';
-
+            btn.textContent = '✔';
+            status.textContent = 'Copied to clipboard';
             setTimeout(() => {
-              copyBtn.innerHTML = '⧉';
-             status.textContent = '';
+              btn.textContent = '⧉';
+              status.textContent = '';
             }, 2000);
           });
           form.remove();
