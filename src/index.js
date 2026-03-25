@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
             textDiv.removeAttribute('hidden');
             const textDivContent = textDiv.querySelector('p.text');
             textDivContent.innerText = metadata.text;
-            // copy yo clipboard button
+            // copy to clipboard button
             const copyBtn = document.getElementById('copyBtn');
             copyBtn.addEventListener('click', async () => {
               await navigator.clipboard.writeText(metadata.text);
