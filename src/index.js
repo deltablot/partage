@@ -36,18 +36,6 @@ document.addEventListener('DOMContentLoaded', function() {
     tosDialog.close();
   });
 
-  // copy to clipboard function
-  const copyToClipboard = (btn, linkOrMetadata) => {
-    const copyBtn = document.getElementById(btn);
-    copyBtn.addEventListener('click', async () => {
-      await navigator.clipboard.writeText(linkOrMetadata);
-      copyBtn.innerText = 'Copied to clipboard!';
-      setTimeout(() => {
-        copyBtn.innerText = 'Copy to clipboard';
-      }, 2000);
-    });
-  }
-
   // INDEX
   const form = document.getElementById('uploadForm');
   if (form) {
@@ -240,7 +228,15 @@ document.addEventListener('DOMContentLoaded', function() {
             textDiv.removeAttribute('hidden');
             const textDivContent = textDiv.querySelector('p.text');
             textDivContent.innerText = metadata.text;
-            copyToClipboard('copyBtn', metadata.text);
+            // copy yo clipboard button
+            const copyBtn = document.getElementById('copyBtn');
+            copyBtn.addEventListener('click', async () => {
+              await navigator.clipboard.writeText(metadata.text);
+              copyBtn.innerText = 'Copied to clipboard!';
+              setTimeout(() => {
+                copyBtn.innerText = 'Copy to clipboard';
+              }, 2000);
+            });
           }
 
           if (metadata.filename) {
