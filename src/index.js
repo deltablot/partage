@@ -100,7 +100,6 @@ document.addEventListener('DOMContentLoaded', function() {
           document.getElementById('anotherDiv').removeAttribute('hidden');
           linkDiv.removeAttribute('hidden');
           btn.removeAttribute('hidden');
-          status.removeAttribute('hidden');
           btnWrapper.removeAttribute('hidden');
           const link = document.createElement('input');
           const linkUrl = `${document.location}get#${json.id}.${json.expires_at}${passphraseInUrl}`;
@@ -119,7 +118,6 @@ document.addEventListener('DOMContentLoaded', function() {
           linkDiv.innerText = '';
           linkDiv.appendChild(link);
           linkDiv.appendChild(btnWrapper);
-          btnWrapper.appendChild(btn);
           btnWrapper.appendChild(status);
           btn.addEventListener('click', async () => {
             await navigator.clipboard.writeText(link.value);
