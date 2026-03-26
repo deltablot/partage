@@ -58,14 +58,14 @@ By default, the program listens on port `8080`. You **need** to have a reverse p
 
 ~~~bash
 # quick and dirty on localhost (no persistence)
-docker run -p 8080:8080 -e SITE_URL=http://localhost:8080 --rm --name partage ghcr.io/delatblot/partage
+docker run -p 8080:8080 -e SITE_URL=http://localhost:8080 --rm --name partage ghcr.io/deltablot/partage
 # or with a volume for persistence
 mkdir files
 # this id/gid corresponds to nobody user in most cases
 # it is the userid running inside the container
 sudo chown 65534:65534 files
 # expose this service through a TLS terminating reverse proxy
-docker run -e SITE_URL=https://partage.example.com --rm --name partage -v $(pwd)/files:/var/partage ghcr.io/delatblot/partage
+docker run -e SITE_URL=https://partage.example.com --rm --name partage -v $(pwd)/files:/var/partage ghcr.io/deltablot/partage
 ~~~
 
 See [docker-compose.yml](./docker-compose.yml.dist) example file.

@@ -1,17 +1,39 @@
 # deploy partage service
 # use: "docker compose up -d" to start service
 services:
-    partage:
-        image: ghcr.io/deltablot/partage:latest
-        container_name: partage
-        security_opt:
-            - no-new-privileges:true
-        restart: always
-        # make sure this folder is writable by user nobody (65534)
-        # try this: mkdir files && chown 65534:65534 files
-        volumes:
-            - ./files:/var/partage
-        environment:
-            - SITE_URL=https://partage.example.com
-        expose:
-            - 8080
+  partage:
+    image: ghcr.io/deltablot/partage:latest
+    container_name: partage
+    security_opt:
+      - no-new-privileges:true
+    restart: always
+    # make sure this folder is writable by user nobody (65534)
+    # try this: mkdir files && chown 65534:65534 files
+    volumes:
+      - ./files:/var/partage
+    environment:
+      - SITE_URL=https://partage.example.com
+    expose:
+      - 8080
+    networks:
+      - internal
+
+# ONLY FOR DEV
+# a reverse proxy on port 443
+# use mkcert.sh to generate a self-signed cert
+#nginx:
+#  image: nginx:stable-alpine
+#  container_name: nginx-proxy
+#  ports:
+#    - "443:443"
+#  volumes:
+#    - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+#    - ./certs:/etc/nginx/certs:ro
+#  depends_on:
+#    - partage
+#  networks:
+#    - internal
+
+networks:
+  internal:
+    driver: bridge
