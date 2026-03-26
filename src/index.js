@@ -114,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
             await navigator.clipboard.writeText(link.value);
           });
           link.innerText = linkUrl;
-          link.classList.add('get-link', 'form-control');
+          link.classList.add('get-link');
           linkDiv.innerText = '';
           linkDiv.appendChild(link);
           linkDiv.appendChild(btnWrapper);
@@ -122,7 +122,6 @@ document.addEventListener('DOMContentLoaded', function() {
           btn.type = 'button';
           btn.classList.add('btn-ghost', 'btn-outline-secondary');
           btn.textContent = '⧉';
-          btn.setAttribute('id', 'clipboard');
           btn.setAttribute('title', 'Copy to clipboard');
           btn.setAttribute('aria-label', 'Copy to clipboard');
           btn.setAttribute('data-action', 'copy');
