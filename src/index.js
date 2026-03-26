@@ -94,15 +94,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if (response.ok) {
           const json = await response.json();
           const linkDiv = document.getElementById('linkDiv');
+          const btn = document.querySelector('[data-action="copy"]');
+          const status = document.getElementById('status');
+          const btnWrapper = document.getElementById('clipboard-wrapper');
           document.getElementById('anotherDiv').removeAttribute('hidden');
           linkDiv.removeAttribute('hidden');
-          linkDiv.classList.add('input-group');
+          btn.removeAttribute('hidden');
+          status.removeAttribute('hidden');
+          btnWrapper.removeAttribute('hidden');
           const link = document.createElement('input');
-          const btn = document.createElement('button');
-          const status = document.createElement('div');
-          const btnWrapper = document.createElement('div');
           const linkUrl = `${document.location}get#${json.id}.${json.expires_at}${passphraseInUrl}`;
-
           link.value = linkUrl;
           link.setAttribute('readonly', 'readonly');
           link.addEventListener('focus', async () => {
@@ -118,23 +119,8 @@ document.addEventListener('DOMContentLoaded', function() {
           linkDiv.innerText = '';
           linkDiv.appendChild(link);
           linkDiv.appendChild(btnWrapper);
-
-          btn.type = 'button';
-          btn.classList.add('btn-ghost', 'btn-outline-secondary');
-          btn.textContent = '⧉';
-          btn.setAttribute('title', 'Copy to clipboard');
-          btn.setAttribute('aria-label', 'Copy to clipboard');
-          btn.setAttribute('data-action', 'copy');
-
-          status.classList.add('helper', 'clipboard-status');
-          status.setAttribute('role', 'status');
-          status.setAttribute('aria-live', 'polite');
-          status.setAttribute('aria-atomic', 'true');
-          status.textContent = '';
-          btnWrapper.classList.add('clipboard-wrapper');
           btnWrapper.appendChild(btn);
           btnWrapper.appendChild(status);
-
           btn.addEventListener('click', async () => {
             await navigator.clipboard.writeText(link.value);
             btn.textContent = '✔';
