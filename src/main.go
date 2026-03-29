@@ -236,6 +236,7 @@ func getFileHandler(w http.ResponseWriter, r *http.Request) {
 	// Serve the file.
 	http.ServeFile(w, r, filePath)
 }
+
 func serveIndexTemplate(w http.ResponseWriter, r *http.Request) {
 	// Determine which page based on the request URL.
 	// Use true if the URL path is "/get"; false otherwise.
