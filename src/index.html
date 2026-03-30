@@ -92,7 +92,11 @@
         </div>
       </form>
       </div>
-      <div hidden id='linkDiv'></div>
+      <div hidden id='linkDiv' class='input-group'></div>
+      <div hidden id='clipboard-wrapper' class='clipboard-wrapper'>
+        <button hidden id='clipboardBtn' type='button' class='btn-ghost btn-outline-secondary' title='Copy to clipboard' aria-label='Copy to clipboard' data-action='copy'>⧉</button>
+        <div id='status' class='helper clipboard-status' role='status'></div>
+      </div>
       <div hidden id='anotherDiv' class='centered'>
         <a class='btn-ghost' href='/'>Upload another file</a>
       </div>

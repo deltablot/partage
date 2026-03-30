@@ -94,8 +94,13 @@ document.addEventListener('DOMContentLoaded', function() {
         if (response.ok) {
           const json = await response.json();
           const linkDiv = document.getElementById('linkDiv');
+          const btn = document.querySelector('[data-action="copy"]');
+          const status = document.getElementById('status');
+          const btnWrapper = document.getElementById('clipboard-wrapper');
           document.getElementById('anotherDiv').removeAttribute('hidden');
           linkDiv.removeAttribute('hidden');
+          btn.removeAttribute('hidden');
+          btnWrapper.removeAttribute('hidden');
           const link = document.createElement('input');
           const linkUrl = `${document.location}get#${json.id}.${json.expires_at}${passphraseInUrl}`;
           link.value = linkUrl;
@@ -108,11 +113,21 @@ document.addEventListener('DOMContentLoaded', function() {
             link.select();
             await navigator.clipboard.writeText(link.value);
           });
-
           link.innerText = linkUrl;
           link.classList.add('get-link');
           linkDiv.innerText = '';
           linkDiv.appendChild(link);
+          linkDiv.appendChild(btnWrapper);
+          btnWrapper.appendChild(status);
+          btn.addEventListener('click', async () => {
+            await navigator.clipboard.writeText(link.value);
+            btn.textContent = '✔';
+            status.textContent = 'Copied to clipboard';
+            setTimeout(() => {
+              btn.textContent = '⧉';
+              status.textContent = '';
+            }, 2000);
+          });
           form.remove();
           let subtitle = 'Copy this link and send it by email. It is recommended to send the passphrase through a different channel';
           if (passphraseInUrl) {
