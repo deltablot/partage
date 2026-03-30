@@ -6,7 +6,11 @@
   },
   "devDependencies": {
     "stylelint": "^17.6.0",
+    "stylelint-config-standard": "^40.0.0",
     "stylelint-declaration-strict-value": "^1.11.1",
     "stylelint-order": "^8.1.1"
+  },
+  "scripts": {
+      "lint:css":  "yarn stylelint \"**/*.css\""
   }
 }

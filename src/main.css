@@ -29,6 +29,7 @@ body {
   flex-direction: column;
   min-height: 100%;
 }
+
 .content {
   align-items: center;
   flex-grow: 1;
@@ -60,9 +61,11 @@ nav {
     padding: 12px;
     text-align: center;
     text-transform: uppercase;
+
     a {
         color: var(--white);
     }
+
     a:hover {
         color: var(--blue);
         text-decoration: none;
@@ -91,7 +94,7 @@ dialog {
 
 dialog::backdrop {
     backdrop-filter: blur(5px);
-    background: rgba(0, 0, 0, 0.4);
+    background: rgb(0 0 0 / 40%);
 }
 
 form {
@@ -100,11 +103,13 @@ form {
     margin: 1rem auto;
     padding: 1rem;
     width: clamp(300px, 42%, 800px);
+
     select {
         background-color: white;
         border-radius: 5px;
         padding: 10px;
     }
+
     select, input {
         border: 1px solid var(--black);
     }
@@ -187,7 +192,7 @@ textarea {
 .helper {
     color: var(--medium);
     font-size: 0.8rem;
-    margin: 10px 0 0 0;
+    margin: 10px 0 0;
     text-align: start;
 }
 
@@ -219,7 +224,7 @@ input[name="passphrase"] {
 }
 
 input:focus {
-    box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
+    box-shadow: 0 0 0 0.2rem rgb(0 123 255 / 25%);
     outline: none;
 }
 
@@ -304,6 +309,7 @@ select[name="deadline"] {
         font-size: 1.2rem;
         margin: 3px 0;
     }
+
     span {
         align-items: baseline;
         font-size: 0.9rem;
@@ -375,9 +381,11 @@ footer {
     font-size: 0.9rem;
     padding: 12px;
     text-align: center;
+
     a {
         color: var(--white);
     }
+
     a:hover {
         color: var(--blue);
         text-decoration: none;
@@ -394,9 +402,9 @@ footer {
 
 .spinner {
   animation: spin 0.6s linear infinite;
-  border: 2px solid rgba(255, 255, 255, 0.2);
+  border: 2px solid rgb(255 255 255 / 20%);
   border-radius: 50%;
-  border-top-color: rgba(255, 255, 255, 0.9);
+  border-top-color: rgb(255 255 255 / 90%);
   display: inline-block;
   height: 16px;
   width: 16px;
