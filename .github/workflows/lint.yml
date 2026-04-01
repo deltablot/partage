@@ -21,14 +21,14 @@ jobs:
           node-version: '24'
           cache: 'yarn'
       -
-        name: Enable corepack
-        run: corepack enable
-      -
         name: Debug versions
         run: |
           which yarn || true
           yarn --version || true
           corepack yarn --version
+      -
+        name: Enable corepack
+        run: corepack enable
       -
         name: Install dependencies
         run: yarn install
