@@ -1,0 +1,25 @@
+/** @type {import('stylelint').Config} */
+export default {
+    extends: ["stylelint-config-standard"],
+    "plugins": [
+        "stylelint-order",
+        "stylelint-declaration-strict-value"
+      ],
+    "rules": {
+        "selector-max-id": 3,
+        "selector-no-qualifying-type": null,
+        "max-nesting-depth": 3,
+        "order/order": [
+          "custom-properties",
+          "declarations",
+          "rules"
+        ],
+        "order/properties-alphabetical-order": true,
+        "scale-unlimited/declaration-strict-value": [
+          ["color", "fill", "stroke"],
+          {
+            "ignoreValues": ["inherit", "transparent", "currentColor", "unset"]
+          }
+        ]
+    }
+};

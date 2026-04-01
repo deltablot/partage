@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', function() {
           const metadata = JSON.parse(new TextDecoder().decode(metadataEncoded));
           document.getElementById('getForm').remove();
           if (metadata.text) {
-            const textDiv = document.getElementById('textDiv');
+            const textDiv = document.getElementById('text-div');
             textDiv.removeAttribute('hidden');
             const textDivContent = textDiv.querySelector('p.text');
             textDivContent.innerText = metadata.text;
