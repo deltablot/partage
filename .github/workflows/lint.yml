@@ -18,20 +18,19 @@ jobs:
         uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         # https://github.com/actions/setup-node/releases/tag/v6.3.0
         with:
-          node-version: '24'
-          cache: 'yarn'
+          node-version: '20'
+      -
+        name: Enable Corepack
+        run: corepack enable
+
       -
         name: Debug versions
         run: |
-          which yarn || true
-          yarn --version || true
-          corepack yarn --version
-      -
-        name: Enable corepack
-        run: corepack enable
-      -
-        name: Install dependencies
+          which yarn
+          yarn --version
+
+      - name: Install dependencies
         run: yarn install
-      -
-        name: Run stylelint
+
+      - name: Run stylelint
         run: yarn lint:css
