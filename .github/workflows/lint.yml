@@ -24,6 +24,12 @@ jobs:
         name: Enable corepack
         run: corepack enable
       -
+        name: Debug versions
+        run: |
+          which yarn || true
+          yarn --version || true
+          corepack yarn --version
+      -
         name: Install dependencies
         run: yarn install
       -
