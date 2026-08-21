@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/base64"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -19,7 +20,7 @@ func TestGetFileHandlerForcesOpaqueDownload(t *testing.T) {
 		storageDirectory = oldStorageDirectory
 	})
 
-	const filename = "019f329d-b729-7b14-9e40-7a24b9849531.1783264224"
+	const filename = "AAAAAAAAAAAA.zzzzzz"
 	const payload = `<!doctype html><script>document.title="xss"</script>`
 	if err := os.WriteFile(filepath.Join(storageDirectory, filename), []byte(payload), 0600); err != nil {
 		t.Fatal(err)
@@ -227,5 +228,41 @@ func TestNewHTTPServerTimeouts(t *testing.T) {
 				t.Errorf("%s = %s, want %s", test.name, test.got, test.want)
 			}
 		})
+	}
+}
+
+func TestShortStorageFilename(t *testing.T) {
+	id, err := newShareID()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(id) != 12 {
+		t.Fatalf("id length = %d, want 12", len(id))
+	}
+	rawID, err := base64.RawURLEncoding.DecodeString(id)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rawID) != shareIDBytes {
+		t.Fatalf("decoded id length = %d, want %d", len(rawID), shareIDBytes)
+	}
+
+	const expiresAt int64 = 1783264224
+	filename := storageFilename(id, expiresAt)
+	if len(filename) != 19 {
+		t.Fatalf("filename length = %d, want 19", len(filename))
+	}
+	gotExpiresAt, err := parseStorageFilename(filename)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if gotExpiresAt != expiresAt {
+		t.Fatalf("expires at = %d, want %d", gotExpiresAt, expiresAt)
+	}
+}
+
+func TestParseStorageFilenameRejectsInvalidID(t *testing.T) {
+	if _, err := parseStorageFilename("not-a-share-id.thpjhc"); err == nil {
+		t.Fatal("invalid share id was accepted")
 	}
 }

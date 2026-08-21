@@ -108,7 +108,7 @@ The `metadata` is a JSON object composed of:
 
 The original file is then added after header and metadata. This blob is then encrypted using a 16 bytes salt and 12 bytes IV. We then concatenate the salt + iv + encrypted blob and send this to the server through a POST request.
 
-This way, the server has no knowledge about the original filename. On the server, the file is stored with a UUIDv7 suffixed with a UNIX timestamp of the expiration time. Periodically, the program will remove files that have expired based on that timestamp stored in the filename. The UUIDv7 makes it nice to `ls` and see older files first, there isn't much more to it.
+This way, the server has no knowledge about the original filename. On the server, the file is stored with a 128-bit random identifier encoded as 22 URL-safe Base64 characters, suffixed with the expiration Unix timestamp encoded in base36. The same compact identifier is used in the share URL. Periodically, the program removes files that have expired based on the timestamp stored in the filename.
 
 To decrypt, we ask the server for the file through the `/api/v1/part` endpoint. We know the size of `salt` and `iv` so we can extract them from the blob, and decrypt the file using the derived key from passphrase.
 

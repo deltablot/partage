@@ -8,6 +8,7 @@ package main
 import (
 	"crypto/rand"
 	"embed"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -20,14 +21,11 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"text/template"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 //go:generate bash build.sh
@@ -65,6 +63,7 @@ var maxFileSize int64
 var defaultMaxTotalFiles int64 = 24
 
 const (
+	shareIDBytes            = 9
 	maxDeadline             = 504 * time.Hour
 	maxMultipartOverhead    = int64(1 << 20)
 	maxDeadlineFieldLength  = int64(64)
@@ -78,20 +77,37 @@ var defaultCleanupTimerMin int64 = 10
 
 var siteUrl = "http://localhost"
 
-// uuidv7TimestampRegex ensures that the filename follows the format:
-// UUID with version 7 (third group starts with '7') and then a hyphen and a Unix timestamp.
-// For example: "123e4567-e89b-7d89-a456-426614174000-1678932930"
-var uuidv7TimestampRegex = regexp.MustCompile(`^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-7[a-fA-F0-9]{3}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}.\d+$`)
-
 // partageKey holds the randomly generated key
 var partageKey string
 
-func getUuidv7() (string, error) {
-	id, err := uuid.NewV7()
-	if err != nil {
-		return "", fmt.Errorf("failed to generate UUID: %w", err)
+func newShareID() (string, error) {
+	rawID := make([]byte, shareIDBytes)
+	if _, err := rand.Read(rawID); err != nil {
+		return "", fmt.Errorf("failed to generate share id: %w", err)
 	}
-	return id.String(), nil
+	return base64.RawURLEncoding.EncodeToString(rawID), nil
+}
+
+func storageFilename(id string, expiresAt int64) string {
+	return id + "." + strconv.FormatInt(expiresAt, 36)
+}
+
+func parseStorageFilename(filename string) (int64, error) {
+	id, expiresAtPart, found := strings.Cut(filename, ".")
+	if !found || strings.Contains(expiresAtPart, ".") {
+		return 0, fmt.Errorf("invalid storage filename")
+	}
+
+	rawID, err := base64.RawURLEncoding.DecodeString(id)
+	if err != nil || len(rawID) != shareIDBytes || base64.RawURLEncoding.EncodeToString(rawID) != id {
+		return 0, fmt.Errorf("invalid share id")
+	}
+
+	expiresAt, err := strconv.ParseInt(expiresAtPart, 36, 64)
+	if err != nil || expiresAt <= 0 || strconv.FormatInt(expiresAt, 36) != expiresAtPart {
+		return 0, fmt.Errorf("invalid base36 expiration")
+	}
+	return expiresAt, nil
 }
 
 func initMaxFileSize() int64 {
@@ -142,7 +158,7 @@ func countStoredFiles() (int64, error) {
 
 	var fileCount int64
 	for _, entry := range entries {
-		if !entry.IsDir() && !strings.HasPrefix(entry.Name(), "upload-") {
+		if !entry.IsDir() && !strings.HasPrefix(entry.Name(), ".upload-") {
 			fileCount++
 		}
 	}
@@ -259,7 +275,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			tempFile, err = os.CreateTemp(storageDirectory, "upload-*")
+			tempFile, err = os.CreateTemp(storageDirectory, ".upload-*")
 			if err != nil {
 				http.Error(w, "Error creating file: "+err.Error(), http.StatusInternalServerError)
 				return
@@ -335,8 +351,8 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// assign id
-	id, err := getUuidv7()
+	// Assign a compact, unguessable 128-bit public identifier.
+	id, err := newShareID()
 	if err != nil {
 		http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
 		return
@@ -345,7 +361,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 	part.ExpiresAt = ts
 	part.Deadline = deadline
 
-	destFilePath := filepath.Join(storageDirectory, part.Id+"."+strconv.FormatInt(ts, 10))
+	destFilePath := filepath.Join(storageDirectory, storageFilename(part.Id, ts))
 	fileCount, err = commitUpload(tempPath, destFilePath, maxFiles)
 	if err != nil {
 		if errors.Is(err, errStorageLimitReached) {
@@ -370,7 +386,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 // GET /part
 func getFileHandler(w http.ResponseWriter, r *http.Request) {
 	filename := r.URL.Path[len("/api/v1/part/"):]
-	if !uuidv7TimestampRegex.MatchString(filename) {
+	if _, err := parseStorageFilename(filename); err != nil {
 		http.Error(w, "Invalid id format", http.StatusBadRequest)
 		return
 	}
@@ -452,17 +468,11 @@ func cleanExpiredFiles(folder string) error {
 			continue
 		}
 		fileName := entry.Name()
-
-		// Split the filename on "-" and get the timestamp part.
-		parts := strings.Split(fileName, ".")
-		if len(parts) < 2 {
-			// Skip files that don't match the expected naming pattern.
+		if strings.HasPrefix(fileName, ".upload-") {
 			continue
 		}
-		tsPart := parts[1]
 
-		// Parse the resulting string as a Unix timestamp.
-		timestamp, err := strconv.ParseInt(tsPart, 10, 64)
+		timestamp, err := parseStorageFilename(fileName)
 		if err != nil {
 			errorLogger.Printf("skipping file %q: error parsing timestamp: %v\n", fileName, err)
 			continue

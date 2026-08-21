@@ -102,7 +102,8 @@ document.addEventListener('DOMContentLoaded', function() {
           btn.removeAttribute('hidden');
           btnWrapper.removeAttribute('hidden');
           const link = document.createElement('input');
-          const linkUrl = `${document.location}get#${json.id}.${json.expires_at}${passphraseInUrl}`;
+          const expiresAt = Number(json.expires_at).toString(36);
+          const linkUrl = `${document.location}get#${json.id}.${expiresAt}${passphraseInUrl}`;
           link.value = linkUrl;
           link.setAttribute('readonly', 'readonly');
           link.addEventListener('focus', async () => {
@@ -150,8 +151,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // we slice it to remove the leading '#'
     const hashParam = location.hash.slice(1);
     const splitParams = hashParam.split('.');
-    const uuid = splitParams[0];
-    const expiresAt = splitParams[1];
+    const shareId = splitParams[0];
+    const expiresAtToken = splitParams[1];
+    const expiresAt = parseInt(expiresAtToken, 36);
     // might be empty
     const passphraseInUrl = splitParams[2];
     const passphraseInput = document.querySelector('input[name="passphrase"]');
@@ -165,13 +167,13 @@ document.addEventListener('DOMContentLoaded', function() {
     getForm.addEventListener("submit", async (event) => {
       event.preventDefault();
       const passphrase = passphraseInput.value;
-      if (!passphrase || !uuid) {
-        alert("Please provide both a passphrase and UUID.");
+      if (!passphrase || !shareId) {
+        alert("Please provide both a passphrase and ID.");
         return;
       }
       try {
         // Fetch the encrypted file as an ArrayBuffer.
-        const response = await fetch(`/api/v1/part/${uuid}.${expiresAt}`);
+        const response = await fetch(`/api/v1/part/${shareId}.${expiresAtToken}`);
         if (!response.ok) {
           alert("Failed to download file. Maybe it is expired?");
           return;
