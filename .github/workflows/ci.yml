@@ -23,6 +23,8 @@ jobs:
         run: corepack enable
       - name: Install dependencies
         run: yarn install --frozen-lockfile
+      - name: Build assets
+        run: cd src && bash build.sh
       - name: Run stylelint
         run: yarn lint:css
 
