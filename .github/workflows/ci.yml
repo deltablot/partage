@@ -23,8 +23,6 @@ jobs:
         run: corepack enable
       - name: Install dependencies
         run: yarn install --frozen-lockfile
-      - name: Build assets
-        run: cd src && bash build.sh
       - name: Run stylelint
         run: yarn lint:css
 
@@ -38,5 +36,7 @@ jobs:
         with:
           go-version: '1.27.0-rc.3'
           cache: false
+      - name: Build assets
+        run: cd src && bash build.sh
       - name: Run Go tests
         run: go test -race ./...

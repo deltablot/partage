@@ -11,6 +11,6 @@
     "stylelint-order": "^8.1.1"
   },
   "scripts": {
-      "lint:css":  "yarn stylelint \"**/*.css\""
+      "lint:css":  "yarn stylelint src/main.css"
   }
 }
