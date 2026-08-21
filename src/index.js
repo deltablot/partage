@@ -74,18 +74,20 @@ document.addEventListener('DOMContentLoaded', function() {
         passphraseInUrl = `.${passphrase}`;
       }
 
-      // do the work
-      const encryptedBlob = await partage.getEncryptedBlob(file, text, passphrase);
-
-      // send the encrypted data for storage
-      const formData = new FormData();
-      // send the key in a custom header
-      const partageKey = document.getElementById('x-partage-key').innerText;
-      const deadline = document.querySelector('select[name="deadline"]').value;
-      const headers = new Headers({'X-Partage-Key': partageKey});
-      formData.append("file", encryptedBlob, "partage");
-      formData.append("deadline", deadline);
+      let encryptedUpload;
       try {
+        // Encrypt in chunks. Large ciphertexts are staged in browser disk storage so
+        // the JS heap never needs to hold the complete file or ciphertext at once.
+        encryptedUpload = await partage.getEncryptedBlob(file, text, passphrase);
+
+        // send the encrypted data for storage
+        const formData = new FormData();
+        // send the key in a custom header
+        const partageKey = document.getElementById('x-partage-key').innerText;
+        const deadline = document.querySelector('select[name="deadline"]').value;
+        const headers = new Headers({'X-Partage-Key': partageKey});
+        formData.append("file", encryptedUpload.blob, "partage");
+        formData.append("deadline", deadline);
         const response = await fetch("/api/v1/parts", {
           method: "POST",
           body: formData,
@@ -140,7 +142,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       } catch (error) {
         console.error("Error uploading file:", error);
-        alert("Upload failed.");
+        alert(error.message || "Upload failed.");
+      } finally {
+        if (encryptedUpload) {
+          await encryptedUpload.cleanup();
+        }
       }
     });
   }
@@ -172,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
       }
       try {
-        // Fetch the encrypted file as an ArrayBuffer.
+        // Fetch as a Blob so the browser can keep large ciphertexts outside the JS heap.
         const response = await fetch(`/api/v1/part/${shareId}.${expiresAtToken}`);
         if (!response.ok) {
           alert("Failed to download file. Maybe it is expired?");
@@ -180,33 +186,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         // change the button to show progress
         mkSpin(getForm.querySelector('button[type="submit"]'));
-        const encryptedDataBuffer = await response.arrayBuffer();
-        const dataView = new Uint8Array(encryptedDataBuffer);
 
-        // Check that we have at least 16 bytes salt + 12 bytes IV.
-        if (dataView.length < partage.saltLength + partage.ivLength) {
-          alert("Invalid encrypted file format.");
-          return;
-        }
-        // Extract the salt (first 16 bytes), IV (next 12 bytes), and ciphertext (rest).
-        const salt = dataView.slice(0, partage.saltLength);
-        const saltIvLength = partage.saltLength + partage.ivLength
-        const iv = dataView.slice(partage.saltLength, saltIvLength);
-        const ciphertext = dataView.slice(saltIvLength);
-
-        // Derive the decryption key using PBKDF2 from the passphrase.
-        const baseKey = await partage.getBaseKey(passphrase);
-        const derivedKey = await partage.getDerivedKey(baseKey, ['decrypt'], salt);
-        // Decrypt
         try {
-          const decryptedBuffer = await partage.decrypt(derivedKey, iv, ciphertext);
-          const clearView = new Uint8Array(decryptedBuffer);
-
-          const header = clearView.slice(0, 2);
-          const dv = new DataView(header.buffer);
-          const metadataLength = dv.getUint16(0, false);
-          const metadataEncoded = clearView.slice(2, metadataLength + 2);
-          const metadata = JSON.parse(new TextDecoder().decode(metadataEncoded));
+          const encryptedBlob = await response.blob();
+          const { metadata, file: decryptedFile } = await partage.decryptBlob(encryptedBlob, passphrase);
           document.getElementById('getForm').remove();
           if (metadata.text) {
             const textDiv = document.getElementById('text-div');
@@ -230,28 +213,26 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const downloadBtn = document.getElementById('downloadBtn');
             downloadBtn.addEventListener('click', () => {
-              const file = clearView.slice(metadataLength + 2);
-              // Create a Blob from the decrypted data and trigger a download.
-              const blob = new Blob([file], { type: metadata.content_type });
               const link = document.createElement("a");
-              link.href = URL.createObjectURL(blob);
+              const objectUrl = URL.createObjectURL(decryptedFile);
+              link.href = objectUrl;
               link.download = metadata.filename;
               document.body.appendChild(link);
               link.click();
               document.body.removeChild(link);
+              setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
             });
             downloadDiv.removeAttribute('hidden');
           }
         } catch (err) {
-          // WebCrypto failures in decrypt() all come back as a DOMException
+          const errorText = document.getElementById('error');
           if (err instanceof DOMException && err.name === "OperationError") {
-            // most likely a bad passphrase / auth tag mismatch
-            const errorText = document.getElementById('error');
             errorText.innerText = "Invalid passphrase or corrupted data.";
-            errorDialog.showModal();
+          } else {
+            errorText.innerText = "Invalid or corrupted encrypted file.";
+            console.error(err);
           }
-          // re‑throw anything else
-          throw err;
+          errorDialog.showModal();
         }
       } catch (err) {
         console.error(err);

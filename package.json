@@ -1,5 +1,6 @@
 {
   "name": "partage",
+  "type": "module",
   "packageManager": "yarn@4.6.0",
   "dependencies": {
     "esbuild": "^0.25.2"
@@ -11,6 +12,7 @@
     "stylelint-order": "^8.1.1"
   },
   "scripts": {
-      "lint:css":  "yarn stylelint src/main.css"
+    "lint:css": "yarn stylelint src/main.css",
+    "test:js": "node --test src/partage_test.js"
   }
 }
