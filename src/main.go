@@ -10,6 +10,7 @@ import (
 	"embed"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -22,6 +23,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"text/template"
 	"time"
 
@@ -34,8 +36,10 @@ import (
 var staticFiles embed.FS
 
 var (
-	infoLogger  = log.New(os.Stdout, "[info] ", log.LstdFlags)
-	errorLogger = log.New(os.Stderr, "[error] ", log.LstdFlags|log.Lshortfile)
+	infoLogger             = log.New(os.Stdout, "[info] ", log.LstdFlags)
+	errorLogger            = log.New(os.Stderr, "[error] ", log.LstdFlags|log.Lshortfile)
+	storageMutex           sync.Mutex
+	errStorageLimitReached = errors.New("storage limit reached")
 )
 
 var tmpl = template.Must(template.ParseFS(staticFiles, "index.html"))
@@ -60,7 +64,11 @@ var maxFileSize int64
 
 var defaultMaxTotalFiles int64 = 24
 
-const maxDeadline = 504 * time.Hour
+const (
+	maxDeadline            = 504 * time.Hour
+	maxMultipartOverhead   = int64(1 << 20)
+	maxDeadlineFieldLength = int64(64)
+)
 
 var defaultCleanupTimerMin int64 = 10
 
@@ -114,6 +122,69 @@ func expireTimestamp(period string) (int64, error) {
 	return time.Now().Add(duration).Unix(), nil
 }
 
+func getMaxTotalFiles() int64 {
+	maxFiles, err := strconv.ParseInt(os.Getenv("MAX_TOTAL_FILES"), 10, 64)
+	if err != nil || maxFiles <= 0 {
+		return defaultMaxTotalFiles
+	}
+	return maxFiles
+}
+
+func countStoredFiles() (int64, error) {
+	entries, err := os.ReadDir(storageDirectory)
+	if err != nil {
+		return 0, err
+	}
+
+	var fileCount int64
+	for _, entry := range entries {
+		if !entry.IsDir() && !strings.HasPrefix(entry.Name(), "upload-") {
+			fileCount++
+		}
+	}
+	return fileCount, nil
+}
+
+func checkStorageCapacity(maxFiles int64) (int64, error) {
+	storageMutex.Lock()
+	defer storageMutex.Unlock()
+
+	fileCount, err := countStoredFiles()
+	if err != nil {
+		return 0, err
+	}
+	if fileCount >= maxFiles {
+		return fileCount, errStorageLimitReached
+	}
+	return fileCount, nil
+}
+
+func commitUpload(tempPath string, destFilePath string, maxFiles int64) (int64, error) {
+	storageMutex.Lock()
+	defer storageMutex.Unlock()
+
+	fileCount, err := countStoredFiles()
+	if err != nil {
+		return 0, err
+	}
+	if fileCount >= maxFiles {
+		return fileCount, errStorageLimitReached
+	}
+	if err := os.Rename(tempPath, destFilePath); err != nil {
+		return fileCount, err
+	}
+	return fileCount + 1, nil
+}
+
+func writeMultipartError(w http.ResponseWriter, err error) {
+	var maxBytesErr *http.MaxBytesError
+	if errors.As(err, &maxBytesErr) {
+		http.Error(w, "Request body too large", http.StatusRequestEntityTooLarge)
+		return
+	}
+	http.Error(w, "Error parsing multipart form: "+err.Error(), http.StatusBadRequest)
+}
+
 // POST Handler
 func postHandler(w http.ResponseWriter, r *http.Request) {
 	// Retrieve the key from the request header.
@@ -130,56 +201,130 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 		CreatedAt: now,
 	}
 
-	// Parse the multipart form with a maximum memory of 10 MB for file parts.
-	// Files larger than this size will be stored in temporary files.
-	err := r.ParseMultipartForm(10 << 20) // 10MB
+	maxBytes := maxFileSize * 1024 * 1024
+	// Bound the complete request before parsing multipart data. MultipartReader streams
+	// parts directly and never spills attacker-controlled data to the process temp dir.
+	r.Body = http.MaxBytesReader(w, r.Body, maxBytes+maxMultipartOverhead)
+	reader, err := r.MultipartReader()
 	if err != nil {
 		http.Error(w, "Error parsing multipart form: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	// Retrieve the file part.
-	file, header, err := r.FormFile("file")
+	maxFiles := getMaxTotalFiles()
+	fileCount, err := checkStorageCapacity(maxFiles)
 	if err != nil {
-		http.Error(w, "Error retrieving file: "+err.Error(), http.StatusBadRequest)
-		return
-	}
-	defer file.Close()
-
-	maxBytes := maxFileSize * 1024 * 1024
-	if header.Size > maxBytes {
-		http.Error(w, fmt.Sprintf("File too large. Maximum allowed is %d MB", maxFileSize), http.StatusRequestEntityTooLarge)
-		return
-	}
-
-	// make sure the file number limit hasn't been reached
-	// enforce max total files in storageDirectory
-	maxFilesStr := os.Getenv("MAX_TOTAL_FILES")
-	maxFiles, err := strconv.ParseInt(maxFilesStr, 10, 64)
-	if err != nil || maxFiles <= 0 {
-		maxFiles = defaultMaxTotalFiles
-	}
-
-	entries, err := os.ReadDir(storageDirectory)
-	if err != nil {
+		if errors.Is(err, errStorageLimitReached) {
+			http.Error(w, fmt.Sprintf("Storage limit exceeded: %d files (max %d)", fileCount, maxFiles), http.StatusInsufficientStorage)
+			return
+		}
 		http.Error(w, "Error reading storage directory: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	var fileCount int64
-	for _, e := range entries {
-		if !e.IsDir() {
-			fileCount++
+	var (
+		deadline    string
+		gotDeadline bool
+		gotFile     bool
+		tempFile    *os.File
+		tempPath    string
+	)
+	defer func() {
+		if tempFile != nil {
+			_ = tempFile.Close()
+		}
+		if tempPath != "" {
+			_ = os.Remove(tempPath)
+		}
+	}()
+
+	for {
+		multipartPart, err := reader.NextPart()
+		if errors.Is(err, io.EOF) {
+			break
+		}
+		if err != nil {
+			writeMultipartError(w, err)
+			return
+		}
+
+		switch multipartPart.FormName() {
+		case "file":
+			if gotFile || multipartPart.FileName() == "" {
+				http.Error(w, "Invalid file part", http.StatusBadRequest)
+				return
+			}
+
+			tempFile, err = os.CreateTemp(storageDirectory, "upload-*")
+			if err != nil {
+				http.Error(w, "Error creating file: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+			tempPath = tempFile.Name()
+
+			written, err := io.Copy(tempFile, io.LimitReader(multipartPart, maxBytes+1))
+			if err != nil {
+				var maxBytesErr *http.MaxBytesError
+				if errors.As(err, &maxBytesErr) {
+					http.Error(w, "Request body too large", http.StatusRequestEntityTooLarge)
+				} else if errors.Is(err, io.ErrUnexpectedEOF) {
+					http.Error(w, "Error parsing multipart form: "+err.Error(), http.StatusBadRequest)
+				} else {
+					http.Error(w, "Error saving file: "+err.Error(), http.StatusInternalServerError)
+				}
+				return
+			}
+			if err := tempFile.Close(); err != nil {
+				http.Error(w, "Error saving file: "+err.Error(), http.StatusInternalServerError)
+				return
+			}
+			tempFile = nil
+			if written > maxBytes {
+				http.Error(w, fmt.Sprintf("File too large. Maximum allowed is %d MB", maxFileSize), http.StatusRequestEntityTooLarge)
+				return
+			}
+			if err := multipartPart.Close(); err != nil {
+				writeMultipartError(w, err)
+				return
+			}
+			gotFile = true
+
+		case "deadline":
+			if gotDeadline || multipartPart.FileName() != "" {
+				http.Error(w, "Invalid deadline part", http.StatusBadRequest)
+				return
+			}
+			deadlineBytes, err := io.ReadAll(io.LimitReader(multipartPart, maxDeadlineFieldLength+1))
+			if err != nil {
+				writeMultipartError(w, err)
+				return
+			}
+			if int64(len(deadlineBytes)) > maxDeadlineFieldLength {
+				http.Error(w, "Deadline value too large", http.StatusBadRequest)
+				return
+			}
+			deadline = string(deadlineBytes)
+			gotDeadline = true
+			if err := multipartPart.Close(); err != nil {
+				writeMultipartError(w, err)
+				return
+			}
+
+		default:
+			http.Error(w, "Unexpected multipart field", http.StatusBadRequest)
+			return
 		}
 	}
 
-	if fileCount >= maxFiles {
-		http.Error(w, fmt.Sprintf("Storage limit exceeded: %d files (max %d)", fileCount, maxFiles), http.StatusInsufficientStorage)
+	if !gotFile {
+		http.Error(w, "Missing file part", http.StatusBadRequest)
+		return
+	}
+	if !gotDeadline {
+		http.Error(w, "Missing deadline part", http.StatusBadRequest)
 		return
 	}
 
-	// Retrieve the deadline part.
-	deadline := r.FormValue("deadline")
 	ts, err := expireTimestamp(deadline)
 	if err != nil {
 		http.Error(w, "Error parsing deadline: "+err.Error(), http.StatusBadRequest)
@@ -196,23 +341,19 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 	part.ExpiresAt = ts
 	part.Deadline = deadline
 
-	// For demonstration, write the uploaded file to disk.
-	// In production, this could be stored in a database or object storage.
-	destFilePath := storageDirectory + "/" + part.Id + "." + strconv.FormatInt(ts, 10)
-	dst, err := os.Create(destFilePath)
+	destFilePath := filepath.Join(storageDirectory, part.Id+"."+strconv.FormatInt(ts, 10))
+	fileCount, err = commitUpload(tempPath, destFilePath, maxFiles)
 	if err != nil {
-		http.Error(w, "Error creating file: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	defer dst.Close()
-
-	// Copy the file content.
-	if _, err := io.Copy(dst, file); err != nil {
+		if errors.Is(err, errStorageLimitReached) {
+			http.Error(w, fmt.Sprintf("Storage limit exceeded: %d files (max %d)", fileCount, maxFiles), http.StatusInsufficientStorage)
+			return
+		}
 		http.Error(w, "Error saving file: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
+	// The temp file has been atomically promoted to its final name.
+	tempPath = ""
 
-	// For now, simply log the record. In a real application, you might save this record in a database.
 	infoLogger.Printf("received new file: %+v", part)
 
 	// Send a confirmation response back as JSON.
