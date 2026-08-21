@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"sync"
 	"testing"
+	"time"
 )
 
 func TestGetFileHandlerForcesOpaqueDownload(t *testing.T) {
@@ -195,5 +196,36 @@ func TestPostHandlerEnforcesFileLimitConcurrently(t *testing.T) {
 	}
 	if len(entries) != 1 {
 		t.Fatalf("storage contains %d files, want 1", len(entries))
+	}
+}
+
+func TestNewHTTPServerTimeouts(t *testing.T) {
+	const addr = ":8080"
+	server := newHTTPServer(addr)
+
+	if server.Addr != addr {
+		t.Errorf("Addr = %q, want %q", server.Addr, addr)
+	}
+	if server.Handler != http.DefaultServeMux {
+		t.Error("Handler is not http.DefaultServeMux")
+	}
+
+	tests := []struct {
+		name string
+		got  time.Duration
+		want time.Duration
+	}{
+		{"ReadHeaderTimeout", server.ReadHeaderTimeout, 10 * time.Second},
+		{"ReadTimeout", server.ReadTimeout, 1 * time.Hour},
+		{"WriteTimeout", server.WriteTimeout, 1 * time.Hour},
+		{"IdleTimeout", server.IdleTimeout, 2 * time.Minute},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if test.got != test.want {
+				t.Errorf("%s = %s, want %s", test.name, test.got, test.want)
+			}
+		})
 	}
 }

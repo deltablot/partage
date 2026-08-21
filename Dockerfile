@@ -20,7 +20,8 @@ RUN bash build.sh
 
 # STEP 2
 # Go builder
-FROM golang:1.24-alpine@sha256:8bee1901f1e530bfb4a7850aa7a479d17ae3a18beb6e09064ed54cfd245b7191 AS gobuilder
+# https://hub.docker.com/layers/library/golang/1.27.0-alpine3.24/images/sha256-632e3a67f8e1da34a2e14c805673915a774bebb8322da4ffec804f6e9f10dd86
+FROM golang@sha256:4c9fe60190a2a3350ddc51de80d0224b8a6698d12bdfc999fee45ea9d6c46dbc AS gobuilder
 # this is set at build time
 ARG VERSION=docker
 # get logo

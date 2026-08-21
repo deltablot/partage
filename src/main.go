@@ -67,7 +67,11 @@ var defaultMaxTotalFiles int64 = 24
 const (
 	maxDeadline            = 504 * time.Hour
 	maxMultipartOverhead   = int64(1 << 20)
-	maxDeadlineFieldLength = int64(64)
+	maxDeadlineFieldLength  = int64(64)
+	serverReadHeaderTimeout = 10 * time.Second
+	serverReadTimeout       = 1 * time.Hour
+	serverWriteTimeout      = 1 * time.Hour
+	serverIdleTimeout       = 2 * time.Minute
 )
 
 var defaultCleanupTimerMin int64 = 10
@@ -534,6 +538,17 @@ func serveAsset(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, f)
 }
 
+func newHTTPServer(addr string) *http.Server {
+	return &http.Server{
+		Addr:              addr,
+		Handler:           http.DefaultServeMux,
+		ReadHeaderTimeout: serverReadHeaderTimeout,
+		ReadTimeout:       serverReadTimeout,
+		WriteTimeout:      serverWriteTimeout,
+		IdleTimeout:       serverIdleTimeout,
+	}
+}
+
 func main() {
 	infoLogger.Printf("starting partage version: %s", partageVersion)
 	// Define and parse command-line flags.
@@ -598,7 +613,8 @@ func main() {
 		infoLogger.Printf("service running at: %s", siteUrl)
 	}
 
-	if err := http.ListenAndServe(addr, nil); err != nil {
+	server := newHTTPServer(addr)
+	if err := server.ListenAndServe(); err != nil {
 		errorLogger.Fatalf("failed to start server: %v", err)
 	}
 }
