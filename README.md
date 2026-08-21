@@ -94,22 +94,16 @@ To download a file, the correct passphrase must be provided, along with the file
 
 ## Low level details
 
-The encrypted blob is built by concatenating three things:
+Uploads use a chunked encrypted format:
 
-header + metadata + file
+header + encrypted metadata + encrypted file chunks
 
-The `header` stores the length of the metadata using two bytes.
+The authenticated header contains a format marker, a 16-byte PBKDF2 salt, an 8-byte random IV prefix, the chunk size, and the encrypted metadata length. The metadata is a JSON object containing the original content type, creation date, filename, size, and optional shared text.
 
-The `metadata` is a JSON object composed of:
+The passphrase-derived AES-256-GCM key is created once per upload. Metadata is encrypted as chunk 0, then the file is encrypted in 4 MiB chunks. Each chunk uses a unique 12-byte IV composed of the random 8-byte prefix followed by a 32-bit chunk counter. The complete header is supplied as AES-GCM additional authenticated data, so modifying format parameters, reordering chunks, truncating a file, or appending data causes authentication or size validation to fail.
 
-- `content_type`: the content-type of the file so we can create a Blob with the same value for download
-- `created_at`: the file creation date
-- `filename`: original file name
+Large encrypted uploads are staged in the browser's origin private file system (OPFS) before being passed to `FormData`. This keeps JavaScript memory bounded to roughly one plaintext chunk plus one ciphertext chunk instead of creating several whole-file copies. Small uploads stay in memory. Large uploads require OPFS so Partage does not silently fall back to allocating the whole ciphertext in RAM; the temporary OPFS ciphertext is removed after the upload finishes.
 
-The original file is then added after header and metadata. This blob is then encrypted using a 16 bytes salt and 12 bytes IV. We then concatenate the salt + iv + encrypted blob and send this to the server through a POST request.
+This way, the server still has no knowledge about the original filename or contents. On the server, the opaque encrypted file is stored with a 72-bit random identifier encoded as 12 URL-safe Base64 characters, suffixed with the expiration Unix timestamp encoded in base36. The same compact identifier is used in the share URL. Periodically, the program removes files that have expired based on the timestamp stored in the filename.
 
-This way, the server has no knowledge about the original filename. On the server, the file is stored with a 72-bit random identifier encoded as 12 URL-safe Base64 characters, suffixed with the expiration Unix timestamp encoded in base36. The same compact identifier is used in the share URL. Periodically, the program removes files that have expired based on the timestamp stored in the filename.
-
-To decrypt, we ask the server for the file through the `/api/v1/part` endpoint. We know the size of `salt` and `iv` so we can extract them from the blob, and decrypt the file using the derived key from passphrase.
-
-Then a link with a `Blob` is created and clicked to make the browser download it.
+On download, files are authenticated and decrypted one chunk at a time, then exposed to the browser as a `Blob` for download.

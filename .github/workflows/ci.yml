@@ -28,6 +28,8 @@ jobs:
         run: yarn install --frozen-lockfile
       - name: Run stylelint
         run: yarn lint:css
+      - name: Run JavaScript tests
+        run: yarn test:js
 
   go-test:
     runs-on: ubuntu-latest
