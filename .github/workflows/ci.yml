@@ -48,6 +48,8 @@ jobs:
           node-version: '24'
       - name: Enable Corepack
         run: corepack enable
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
       - name: Build assets
         run: cd src && bash build.sh
       - name: Run Go tests
