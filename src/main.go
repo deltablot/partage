@@ -65,8 +65,8 @@ var maxFileSize int64
 var defaultMaxTotalFiles int64 = 24
 
 const (
-	maxDeadline            = 504 * time.Hour
-	maxMultipartOverhead   = int64(1 << 20)
+	maxDeadline             = 504 * time.Hour
+	maxMultipartOverhead    = int64(1 << 20)
 	maxDeadlineFieldLength  = int64(64)
 	serverReadHeaderTimeout = 10 * time.Second
 	serverReadTimeout       = 1 * time.Hour
@@ -610,7 +610,7 @@ func main() {
 		http.HandleFunc("GET /utils.js", serveAsset)
 		http.HandleFunc("GET /index.css", serveAsset)
 		http.HandleFunc("GET /main.css", serveAsset)
-		infoLogger.Printf("service running at: %s", siteUrl)
+		infoLogger.Printf("service running at: http://localhost:%s", *port)
 	}
 
 	server := newHTTPServer(addr)

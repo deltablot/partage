@@ -5,7 +5,8 @@
 
 # STEP 1
 # Node image to minify js and css files + brotli compression
-FROM node:23-alpine@sha256:a34e14ef1df25b58258956049ab5a71ea7f0d498e41d0b514f4b8de09af09456 AS bundler
+# https://hub.docker.com/hardened-images/catalog/dhi/node/images/node%2Falpine-3.24%2F26-dev/sha256-8f0f7718a70430aede7dc2cbd0f9ef6a785fe5013cf66ca5677a2e9bae2bb4e6
+FROM dhi.io/node@sha256:4b22d4f59496bc6873e5c48a474b9a4a82a6016c51d54afed3ab9d552f86aa0c AS bundler
 RUN corepack enable \
     && corepack prepare yarn@stable --activate
 RUN apk add --no-cache brotli bash
@@ -20,8 +21,8 @@ RUN bash build.sh
 
 # STEP 2
 # Go builder
-# https://hub.docker.com/layers/library/golang/1.27.0-alpine3.24/images/sha256-632e3a67f8e1da34a2e14c805673915a774bebb8322da4ffec804f6e9f10dd86
-FROM golang@sha256:4c9fe60190a2a3350ddc51de80d0224b8a6698d12bdfc999fee45ea9d6c46dbc AS gobuilder
+# https://hub.docker.com/hardened-images/catalog/dhi/golang/images/golang%2Falpine-3.24%2F1.27-dev/sha256-16c6c30bba8ee464931c026ca85c08ff4d8cb900d57a24b2d3676bf5c20e63b7
+FROM dhi.io/golang@sha256:2852e3a139abb33e0b609030416a89d69e3f713ab21ed13470fe3efdca791a8c AS gobuilder
 # this is set at build time
 ARG VERSION=docker
 # get logo
@@ -44,14 +45,16 @@ RUN export SVG_LOGO=$(curl -fsL ${SVG_LOGO_URL}) \
     && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s -X 'main.svgLogo=${SVG_LOGO}' -X 'main.partageVersion=${VERSION}'" -o /partage ./src/main.go
 
 # use busybox to create a correctly chown dir
-FROM busybox:1.37-uclibc AS prepare
+# https://hub.docker.com/hardened-images/catalog/dhi/busybox/images/busybox%2Falpine-3.24%2F1-dev/sha256-2a35e95f106bcf78cc128618abdea150cb93c172b6cc8bdeee359b47d818cdef
+FROM dhi.io/busybox@sha256:e625a8b84be579bb84c27fcbc6e01d6dbe4b934662e8cc9881664743f692353a AS prepare
 RUN mkdir -p /var/partage \
     && chown nobody:nobody /var/partage
 
 # use distroless instead of scratch to have ssl certificates and nobody
 # dev: use :debug tag to have shell
 #FROM gcr.io/distroless/static:debug
-FROM gcr.io/distroless/static:nonroot
+# https://hub.docker.com/hardened-images/catalog/dhi/static/images/static%2Falpine-3.24%2Fstatic/sha256-1e0311fd1463e15ab562ca81b287bde73e58327126678da98cf67b8efc8d3a81
+FROM dhi.io/static@sha256:93568eb7c673afb3ad79b15cca341469d3e02cf859caae1049aa22fe7fbce90a
 # copy the pre‑owned directory
 COPY --from=prepare --chown=nobody:nobody /var/partage /var/partage
 COPY --from=gobuilder /partage /usr/local/bin/partage
