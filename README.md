@@ -17,7 +17,7 @@ No extra fonts, no runtime libraries, no i18n, simple and straightforward interf
 
 It is a very simple service to deploy, with a single container of about 10 Mb. There are no database, nothing fancy to setup. You launch the container and it runs.
 
-We believe in lean software, meaning that we only add what is necessary. In the case of **Partage**, there are no runtime javascript dependencies, and a single go dependency (for UUID). The whole source code can be audited easily, because it's so small.
+We believe in lean software, meaning that we only add what is necessary. In the case of **Partage**, there are no runtime javascript dependencies, and no go dependency. The whole source code can be audited easily, because it's so small.
 
 The css and javascript assets are minified and served with brotli compression. The whole application is only a few kb. That's a *small fraction* of the size of files loaded by other similar solutions.
 
@@ -108,7 +108,7 @@ The `metadata` is a JSON object composed of:
 
 The original file is then added after header and metadata. This blob is then encrypted using a 16 bytes salt and 12 bytes IV. We then concatenate the salt + iv + encrypted blob and send this to the server through a POST request.
 
-This way, the server has no knowledge about the original filename. On the server, the file is stored with a UUIDv7 suffixed with a UNIX timestamp of the expiration time. Periodically, the program will remove files that have expired based on that timestamp stored in the filename. The UUIDv7 makes it nice to `ls` and see older files first, there isn't much more to it.
+This way, the server has no knowledge about the original filename. On the server, the file is stored with a 72-bit random identifier encoded as 12 URL-safe Base64 characters, suffixed with the expiration Unix timestamp encoded in base36. The same compact identifier is used in the share URL. Periodically, the program removes files that have expired based on the timestamp stored in the filename.
 
 To decrypt, we ask the server for the file through the `/api/v1/part` endpoint. We know the size of `salt` and `iv` so we can extract them from the blob, and decrypt the file using the derived key from passphrase.
 
