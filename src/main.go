@@ -60,6 +60,8 @@ var maxFileSize int64
 
 var defaultMaxTotalFiles int64 = 24
 
+const maxDeadline = 504 * time.Hour
+
 var defaultCleanupTimerMin int64 = 10
 
 var siteUrl = "http://localhost"
@@ -105,6 +107,9 @@ func expireTimestamp(period string) (int64, error) {
 	duration, err := time.ParseDuration(period)
 	if err != nil {
 		return 0, err
+	}
+	if duration > maxDeadline {
+		return 0, fmt.Errorf("deadline exceeds maximum allowed duration of 504h")
 	}
 	return time.Now().Add(duration).Unix(), nil
 }
