@@ -4,6 +4,7 @@ services:
   partage:
     image: ghcr.io/deltablot/partage:latest
     container_name: partage
+    read_only: true
     security_opt:
       - no-new-privileges:true
     restart: always
