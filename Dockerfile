@@ -25,6 +25,8 @@ RUN bash build.sh
 FROM dhi.io/golang@sha256:2852e3a139abb33e0b609030416a89d69e3f713ab21ed13470fe3efdca791a8c AS gobuilder
 # this is set at build time
 ARG VERSION=docker
+ARG TARGETOS
+ARG TARGETARCH
 # get logo
 RUN apk add --no-cache curl
 ARG SVG_LOGO_URL="https://www.deltablot.com/img/deltablot-purple.svg"
@@ -37,12 +39,12 @@ RUN go mod download
 COPY src src
 COPY --from=bundler /home/node/src/dist src/dist
 # disable CGO or it doesn't work in scratch
-# target linux/amd64
+# target requested platform
 # -w turn off DWARF debugging
 # -s turn off symbol table
 # change version at linking time
 RUN export SVG_LOGO=$(curl -fsL ${SVG_LOGO_URL}) \
-    && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s -X 'main.svgLogo=${SVG_LOGO}' -X 'main.partageVersion=${VERSION}'" -o /partage ./src/main.go
+    && CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build -ldflags="-w -s -X 'main.svgLogo=${SVG_LOGO}' -X 'main.partageVersion=${VERSION}'" -o /partage ./src/main.go
 
 # use busybox to create a correctly chown dir
 # https://hub.docker.com/hardened-images/catalog/dhi/busybox/images/busybox%2Falpine-3.24%2F1-dev/sha256-2a35e95f106bcf78cc128618abdea150cb93c172b6cc8bdeee359b47d818cdef
