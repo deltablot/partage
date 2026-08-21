@@ -8,7 +8,7 @@ Security researchers can report vulnerabilities privately on this repository's S
 
 See our [Responsible Disclosure Policy](https://www.deltablot.com/security/).
 
-# Responsible disclosure hall of fame
+## Responsible disclosure hall of fame
 
 We thank these users for reporting vulnerabilities responsibly:
 
