@@ -238,7 +238,12 @@ func getFileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Serve the file.
+	// Force opaque downloads so http.ServeFile cannot content-sniff attacker-controlled
+	// bytes into an active browser content type.
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Header().Set("Content-Disposition", "attachment")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("Content-Security-Policy", "default-src 'none';")
 	http.ServeFile(w, r, filePath)
 }
 
