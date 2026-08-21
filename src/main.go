@@ -351,7 +351,7 @@ func postHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Assign a compact, unguessable 128-bit public identifier.
+	// Assign a compact, unguessable 72-bit public identifier.
 	id, err := newShareID()
 	if err != nil {
 		http.Error(w, "Error: "+err.Error(), http.StatusInternalServerError)
