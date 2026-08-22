@@ -18,6 +18,13 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
+
+  const generatePassphraseBtn = document.querySelector('.generate-passphrase');
+  if (generatePassphraseBtn) {
+    generatePassphraseBtn.addEventListener('click', () => {
+      generatePassphraseBtn.parentElement.querySelector('input').value = crypto.randomUUID();
+    });
+  }
   const partage = new Partage();
 
   const errorDialog = document.getElementById('error-dialog');
