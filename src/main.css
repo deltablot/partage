@@ -264,6 +264,24 @@ select[name="deadline"] {
     }
 }
 
+.password-wrapper .generate-passphrase {
+    background: none;
+    border: none;
+    border-radius: 5px;
+    color: var(--black);
+    cursor: pointer;
+    font-size: 1.2em;
+    margin: 0;
+    padding: 0 5px;
+    position: absolute;
+    right: 0.25em;
+    top: 0;
+
+    &:hover {
+        background-color: var(--highlight);
+    }
+}
+
 :user-invalid {
     border: 1px solid var(--red);
     box-shadow: 0 0 8px var(--red);
